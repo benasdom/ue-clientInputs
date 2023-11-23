@@ -1,0 +1,149 @@
+<!DO required onchange="changes(this)" oninvalid="handleError()"CTYP requiredE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width">
+  <link rel="stylesheet" href="desktopview.css">    
+  <link rel="stylesheet" href="mobileview.css">    
+  <link href="./imgs/icon-b.webp" rel="icon"/>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" integrity="sha512-iecdLmaskl7CVkqkXNQ/ZH/XLlvWZOJyj7Yy7tcenmpD1ypASozpmT/E0iPtmFIB46ZmdtAc9eNBvH0H/ZpiBw==" crossorigin="anonymous" referrerpolicy="no-referrer" />    <link rel="stylesheet" href="uemovies.css">
+
+  <title>Unity Elites client form</title>
+</head>
+
+<body>
+  <div id="toload"><img class="loadimg" src="./imgs/icon-a.webp" width="50" /></div>
+
+  <div class="errormessage">
+    <p class="mess">  Notice:
+    </p>
+  </div>
+<div class="container">
+
+   <!-- Tabbed Navigation -->
+<img class="logo" src="./imgs/uepage.png"/>
+
+  <!-- Form Content -->
+  <form class="tab-content" action="" name="ue-sheets" method="POST">
+    <ul class="tab-navigation">
+      <li class="tab-navigation-item active" data-tab="contactInfo">1</li>
+      <li class="tab-navigation-item" data-tab="businessInfo">2</li>
+      <li class="tab-navigation-item" data-tab="businessInfo">3</li>
+      <li class="tab-navigation-item" data-tab="businessInfo">4</li>
+      <!-- Add more tabs for additional form sections as needed -->
+    </ul>
+
+    <!-- Contact Information Section -->
+    <div class="tab-pane active" id="contactInfo">
+      <div class="query">
+        <div class="question" id="q1"><span class="fa ">🐼</span><br><p>
+          Enter your full name
+        </p></div>
+        <div class="question" id="q2"><span class="fa ">📮</span><br><p>Your email address</p></div>
+        <div class="question" id="q3"><span class="fa ">📲</span><br><p>Enter your phone number</p></div>
+      </div>
+        <div class="forms">
+        <a href="#q1" class="form-group">
+          <label class="label" for="fullName">🤵 :</label>
+          <input required onchange="changes(this)" oninvalid="handleError(this)" required name="Name" type="text" class="form-control" id="fullName" placeholder="eg. Clark Kent">
+        </a>
+        <a href="#q2" class="form-group">
+          <label class="label" for="email">📫 :</label>
+          <input required onchange="changes(this)" oninvalid="handleError(this)" required name="Email" type="email" class="form-control" id="email" placeholder="eg. example@gmail.com, user@domain.com">
+        </a>
+        <a href="#q3" class="form-group">
+          <label class="label" for="phone">☎️ :</label>
+          <input required onchange="changes(this)" oninvalid="handleError(this)" required name="Phone" type="tel" class="form-control" id="phone" placeholder="eg.0100101001">
+        </a>
+        <button required  type="button" class="btn btn-primary" id="nextContact">Next</button>
+      </div>
+    </div>
+
+    <!-- Business Information Section -->
+    <div class="tab-pane" id="businessInfo">
+      <div class="query">
+        <div class="question" id="q4"><span class="fa ">🪙</span><br><p>Name of business</p></div>
+        <div class="question" id="q5"><span class="fa ">🗺️</span><br><p>Business location</p></div>
+        <div class="question" id="q6"><span class="fa ">💡</span><br><p>what you wish to use the site for</p></div>
+      </div>
+        <div class="forms">
+        <a href="#q4" class="form-group">
+          <label class="label" for="businessName">💼 :</label>
+          <input required onchange="changes(this)" oninvalid="handleError(this)" required name="BusinessName" type="text" class="form-control" id="businessName" placeholder="eg. Unity Elites">
+        </a>
+        <a href="#q5" class="form-group">
+          <label class="label" for="businessLocation">🗺️ :</label>
+          <input required onchange="changes(this)" oninvalid="handleError(this)" required name="BusinessLocation" type="text" class="form-control" id="businessLocation" placeholder="address-code,city,country">
+        </a>
+        <a href="#q6" class="form-group">
+          <label class="label" for="websiteGoal">🧾 :</label>
+          <input class="form-control" id="websiteGoal" rows="3" placeholder="eg. Sales, creating contacts,information, etc." required onchange="changes(this)" oninvalid="handleError(this)" required name="SitePurpose" type="text" />
+        </a>
+        <button  type="button" class="btn btn-primary" id="prevBusiness">Previous</button>
+        <button  type="button" class="btn btn-primary" id="nextBusiness1">Next</button>
+      </div>
+    </div>
+
+    <!-- Add more sections as needed -->
+    <div class="tab-pane" id="businessInfo">
+        <div class="query">
+            <div class="question" id="q7"><span class="fa ">🤝</span><br><p>List of services</p></div>
+            <div class="question" id="q8"><span class="fa ">💫</span><br><p>Do you have an existing logo</p></div>
+            <div class="question" id="q9"><span class="fa ">👩‍🎨</span><br><p>Provide 3 colors for your theme</div>
+        </div>
+        <div class="forms">
+          <a href="#q7" class="form-group">
+            <label class="label" for="ServiceList">👩‍🏫 :</label>
+            <input required onchange="changes(this)" oninvalid="handleError(this)" required name="ServiceList" type="text" class="form-control" id="ServiceList" placeholder=" (e.g., haircuts, styling, makeup)">
+          </a>
+     
+        <a href="#q8" class="form-group">
+            <label class="label" for="radio">🥨 :</label>
+            <input required onchange="changes(this)" oninvalid="handleError(this)" required name="HasLogo" type="text" class="form-control" id="radio" placeholder="eg. No,Yes,Yes but i might need another">
+          </a>
+          <a href="#q9" class="form-group">
+            <label class="label" for="colors">🎨 :</label>
+            <input class="form-control" id="colors" rows="3" placeholder="eg. 60% grey, 20% yellow, 10% brown" required onchange="changes(this)" oninvalid="handleError(this)" required name="Colors" type="text" />
+          </a>
+          <button  type="button" class="btn btn-primary" id="prevBusiness1">Previous</button>
+          <button  type="button" class="btn btn-primary" id="nextBusiness2">Next</button>
+        </div>
+      </div>
+  
+      <!-- Add more sections as needed -->
+    
+        <div class="tab-pane" id="businessInfo">
+        <div class="query">
+            <div class="question" id="q10"><span class="fa ">📸</span><br><p>Social media pages or contact?</p></div>
+            <div class="question" id="q11"><span class="fa ">🏵️</span><br><p>What feartures do you need?</p></div>
+            <div class="question" id="q12"><span class="fa ">💬</span><br><p>Messages to your audience on the website</p></div>
+        </div>
+            <div class="forms">
+              
+          <a href="#q10" class="form-group">
+            <label class="label" for="socialmedia">👥 :</label>
+            <input required onchange="changes(this)" oninvalid="handleError(this)" required type="text" name="SocialMedia" class="form-control" id="socialmedia" placeholder="Business pages, instagram,twitter.. and more">
+          </a>
+          <a href="#q11" class="form-group">
+            <label class="label" for="funcitonality">🏗️ :</label>
+            <input required onchange="changes(this)" oninvalid="handleError(this)" required type="text" name="AddFeatures" class="form-control" id="funcitonality" placeholder="eg.Booking systems,call, email.etc">
+          </a>
+          <a href="#q12" class="form-group">
+            <label class="label" for="content">🪧 :</label>
+            <input class="form-control" id="content" rows="3" placeholder="This message would be displayed on the site" required onchange="changes(this)" oninvalid="handleError(this)" required type="text" name="PagesMessage" />
+          </a>
+          <button   type="button" class="btn btn-primary" id="prevBusiness2">Previous</button>
+          <button    type="submit" class="btn btn-primary" value="Submit" id="nextBusiness3"> 
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="none" class="icon-sm transition-colors group-hover/button:text-brand-purple" width="16" height="16"><path d="M12.784 1.442a.8.8 0 0 0-1.569 0l-.191.953a.8.8 0 0 1-.628.628l-.953.19a.8.8 0 0 0 0 1.57l.953.19a.8.8 0 0 1 .628.629l.19.953a.8.8 0 0 0 1.57 0l.19-.953a.8.8 0 0 1 .629-.628l.953-.19a.8.8 0 0 0 0-1.57l-.953-.19a.8.8 0 0 1-.628-.629l-.19-.953h-.002ZM5.559 4.546a.8.8 0 0 0-1.519 0l-.546 1.64a.8.8 0 0 1-.507.507l-1.64.546a.8.8 0 0 0 0 1.519l1.64.547a.8.8 0 0 1 .507.505l.546 1.641a.8.8 0 0 0 1.519 0l.546-1.64a.8.8 0 0 1 .506-.507l1.641-.546a.8.8 0 0 0 0-1.519l-1.64-.546a.8.8 0 0 1-.507-.506L5.56 4.546Zm5.6 6.4a.8.8 0 0 0-1.519 0l-.147.44a.8.8 0 0 1-.505.507l-.441.146a.8.8 0 0 0 0 1.519l.44.146a.8.8 0 0 1 .507.506l.146.441a.8.8 0 0 0 1.519 0l.147-.44a.8.8 0 0 1 .506-.507l.44-.146a.8.8 0 0 0 0-1.519l-.44-.147a.8.8 0 0 1-.507-.505l-.146-.441Z" fill="currentColor"></path></svg>
+            Submit</button>
+        </div>
+      </div>
+   
+      <!-- Add more sections as needed -->
+    </form>
+</div>
+
+<script src="index.js"></script>
+
+</body>
+</html>
