@@ -1,149 +1,257 @@
-<!DO required onchange="changes(this)" oninvalid="handleError()"CTYP requiredE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width">
-  <link rel="stylesheet" href="desktopview.css">    
-  <link rel="stylesheet" href="mobileview.css">    
-  <link href="./imgs/icon-b.webp" rel="icon"/>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" integrity="sha512-iecdLmaskl7CVkqkXNQ/ZH/XLlvWZOJyj7Yy7tcenmpD1ypASozpmT/E0iPtmFIB46ZmdtAc9eNBvH0H/ZpiBw==" crossorigin="anonymous" referrerpolicy="no-referrer" />    <link rel="stylesheet" href="uemovies.css">
-
-  <title>Unity Elites client form</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Unity Elites — Client Form</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&display=swap" rel="stylesheet">
+ <link rel="stylesheet" href="desktopview.css">
+  <script src="index.js" defer></script>
 </head>
-
 <body>
-  <div id="toload"><img class="loadimg" src="./imgs/icon-a.webp" width="50" /></div>
 
-  <div class="errormessage">
-    <p class="mess">  Notice:
-    </p>
+  <!-- Loading Screen -->
+  <div id="loader">
+    <div class="loader-ring"></div>
+    <p class="loader-label">Unity Elites</p>
   </div>
-<div class="container">
 
-   <!-- Tabbed Navigation -->
-<img class="logo" src="./imgs/uepage.png"/>
+  <!-- Submitting Overlay -->
+  <div id="submitting-overlay">
+    <div class="loader-ring"></div>
+    <p class="submitting-label">Sending…</p>
+  </div>
 
-  <!-- Form Content -->
-  <form class="tab-content" action="" name="ue-sheets" method="POST">
-    <ul class="tab-navigation">
-      <li class="tab-navigation-item active" data-tab="contactInfo">1</li>
-      <li class="tab-navigation-item" data-tab="businessInfo">2</li>
-      <li class="tab-navigation-item" data-tab="businessInfo">3</li>
-      <li class="tab-navigation-item" data-tab="businessInfo">4</li>
-      <!-- Add more tabs for additional form sections as needed -->
-    </ul>
+  <!-- Toast -->
+  <div id="toast" role="alert" aria-live="polite">
+    <span class="toast-dot"></span>
+    <span id="toast-msg"></span>
+  </div>
 
-    <!-- Contact Information Section -->
-    <div class="tab-pane active" id="contactInfo">
-      <div class="query">
-        <div class="question" id="q1"><span class="fa ">🐼</span><br><p>
-          Enter your full name
-        </p></div>
-        <div class="question" id="q2"><span class="fa ">📮</span><br><p>Your email address</p></div>
-        <div class="question" id="q3"><span class="fa ">📲</span><br><p>Enter your phone number</p></div>
-      </div>
-        <div class="forms">
-        <a href="#q1" class="form-group">
-          <label class="label" for="fullName">🤵 :</label>
-          <input required onchange="changes(this)" oninvalid="handleError(this)" required name="Name" type="text" class="form-control" id="fullName" placeholder="eg. Clark Kent">
-        </a>
-        <a href="#q2" class="form-group">
-          <label class="label" for="email">📫 :</label>
-          <input required onchange="changes(this)" oninvalid="handleError(this)" required name="Email" type="email" class="form-control" id="email" placeholder="eg. example@gmail.com, user@domain.com">
-        </a>
-        <a href="#q3" class="form-group">
-          <label class="label" for="phone">☎️ :</label>
-          <input required onchange="changes(this)" oninvalid="handleError(this)" required name="Phone" type="tel" class="form-control" id="phone" placeholder="eg.0100101001">
-        </a>
-        <button required  type="button" class="btn btn-primary" id="nextContact">Next</button>
+  <div id="app">
+    <!-- Header -->
+    <header class="header">
+      <p class="header-eyebrow">Client Brief</p>
+      <h1 class="header-title">Let's build<br>something great.</h1>
+      <p class="header-sub">Fill out the form — takes under 3 minutes.</p>
+    </header>
+
+    <!-- Progress -->
+    <div class="progress-bar-wrap">
+      <div class="progress-bar-track">
+        <div class="progress-bar-fill" id="progress-fill" style="width: 25%"></div>
       </div>
     </div>
 
-    <!-- Business Information Section -->
-    <div class="tab-pane" id="businessInfo">
-      <div class="query">
-        <div class="question" id="q4"><span class="fa ">🪙</span><br><p>Name of business</p></div>
-        <div class="question" id="q5"><span class="fa ">🗺️</span><br><p>Business location</p></div>
-        <div class="question" id="q6"><span class="fa ">💡</span><br><p>what you wish to use the site for</p></div>
+    <!-- Stepper -->
+    <nav class="stepper" aria-label="Form steps">
+      <div class="step-item active" data-step="0" role="button" tabindex="0" aria-label="Step 1: You">
+        <div class="step-dot">1</div>
+        <span class="step-label">You</span>
       </div>
-        <div class="forms">
-        <a href="#q4" class="form-group">
-          <label class="label" for="businessName">💼 :</label>
-          <input required onchange="changes(this)" oninvalid="handleError(this)" required name="BusinessName" type="text" class="form-control" id="businessName" placeholder="eg. Unity Elites">
-        </a>
-        <a href="#q5" class="form-group">
-          <label class="label" for="businessLocation">🗺️ :</label>
-          <input required onchange="changes(this)" oninvalid="handleError(this)" required name="BusinessLocation" type="text" class="form-control" id="businessLocation" placeholder="address-code,city,country">
-        </a>
-        <a href="#q6" class="form-group">
-          <label class="label" for="websiteGoal">🧾 :</label>
-          <input class="form-control" id="websiteGoal" rows="3" placeholder="eg. Sales, creating contacts,information, etc." required onchange="changes(this)" oninvalid="handleError(this)" required name="SitePurpose" type="text" />
-        </a>
-        <button  type="button" class="btn btn-primary" id="prevBusiness">Previous</button>
-        <button  type="button" class="btn btn-primary" id="nextBusiness1">Next</button>
+      <div class="step-item" data-step="1" role="button" tabindex="0" aria-label="Step 2: Business">
+        <div class="step-dot">2</div>
+        <span class="step-label">Business</span>
       </div>
+      <div class="step-item" data-step="2" role="button" tabindex="0" aria-label="Step 3: Design">
+        <div class="step-dot">3</div>
+        <span class="step-label">Design</span>
+      </div>
+      <div class="step-item" data-step="3" role="button" tabindex="0" aria-label="Step 4: Launch">
+        <div class="step-dot">4</div>
+        <span class="step-label">Launch</span>
+      </div>
+    </nav>
+
+    <!-- Form -->
+    <main class="form-shell" id="form-shell">
+
+      <!-- Panel 1: Contact -->
+      <section class="panel active" data-panel="0" aria-labelledby="p1-heading">
+        <p class="panel-counter"><span>1</span> / 4 — Contact Info</p>
+        <div class="section-tag"><div class="section-tag-line"></div><span class="section-tag-label" id="p1-heading">About you</span><div class="section-tag-line"></div></div>
+
+        <div class="field" id="field-fullName">
+          <label class="field-label" for="fullName">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+            Full Name
+          </label>
+          <input class="field-input" type="text" id="fullName" name="Name" placeholder="e.g. Clark Kent" autocomplete="name" autocorrect="off" spellcheck="false">
+          <span class="field-hint">Please enter your full name.</span>
+        </div>
+
+        <div class="field" id="field-email">
+          <label class="field-label" for="email">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect width="20" height="16" x="2" y="4" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>
+            Email Address
+          </label>
+          <input class="field-input" type="email" id="email" name="Email" placeholder="e.g. you@domain.com" autocomplete="email" inputmode="email" autocapitalize="none" autocorrect="off" spellcheck="false">
+          <span class="field-hint">Enter a valid email address.</span>
+        </div>
+
+        <div class="field" id="field-phone">
+          <label class="field-label" for="phone">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 13 19.79 19.79 0 0 1 1.61 4.32a2 2 0 0 1 1.99-2.18h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 9.91a16 16 0 0 0 6.06 6.06l.92-.92a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+            Phone Number
+          </label>
+          <input class="field-input" type="tel" id="phone" name="Phone" placeholder="e.g. 0244000000" autocomplete="tel" inputmode="tel">
+          <span class="field-hint">Enter a valid phone number.</span>
+        </div>
+
+        <div class="btn-row">
+          <button class="btn btn-primary" type="button" id="btn-next-0">
+            Continue
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+          </button>
+        </div>
+      </section>
+
+      <!-- Panel 2: Business Info -->
+      <section class="panel" data-panel="1" aria-labelledby="p2-heading">
+        <p class="panel-counter"><span>2</span> / 4 — Business Details</p>
+        <div class="section-tag"><div class="section-tag-line"></div><span class="section-tag-label" id="p2-heading">Your business</span><div class="section-tag-line"></div></div>
+
+        <div class="field" id="field-businessName">
+          <label class="field-label" for="businessName">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect width="20" height="14" x="2" y="7" rx="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>
+            Business Name
+          </label>
+          <input class="field-input" type="text" id="businessName" name="BusinessName" placeholder="e.g. Unity Elites" autocomplete="organization" autocorrect="off">
+          <span class="field-hint">Enter your business name.</span>
+        </div>
+
+        <div class="field" id="field-businessLocation">
+          <label class="field-label" for="businessLocation">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg>
+            Business Location
+          </label>
+          <input class="field-input" type="text" id="businessLocation" name="BusinessLocation" placeholder="e.g. Accra, Ghana" autocomplete="address-level2" autocorrect="off">
+          <span class="field-hint">Enter your business location.</span>
+        </div>
+
+        <div class="field" id="field-websiteGoal">
+          <label class="field-label" for="websiteGoal">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"/><path d="M2 12h20"/></svg>
+            Site Purpose
+          </label>
+          <input class="field-input" type="text" id="websiteGoal" name="SitePurpose" placeholder="e.g. Sales, contacts, information…" autocorrect="off">
+          <span class="field-hint">Tell us what the site is for.</span>
+        </div>
+
+        <div class="btn-row">
+          <button class="btn btn-ghost" type="button" id="btn-prev-1">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 12H5"/><path d="m12 19-7-7 7-7"/></svg>
+            Back
+          </button>
+          <button class="btn btn-primary" type="button" id="btn-next-1">
+            Continue
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+          </button>
+        </div>
+      </section>
+
+      <!-- Panel 3: Design -->
+      <section class="panel" data-panel="2" aria-labelledby="p3-heading">
+        <p class="panel-counter"><span>3</span> / 4 — Design & Brand</p>
+        <div class="section-tag"><div class="section-tag-line"></div><span class="section-tag-label" id="p3-heading">Your brand</span><div class="section-tag-line"></div></div>
+
+        <div class="field" id="field-serviceList">
+          <label class="field-label" for="serviceList">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+            Services Offered
+          </label>
+          <input class="field-input" type="text" id="serviceList" name="ServiceList" placeholder="e.g. haircuts, styling, makeup" autocorrect="off">
+          <span class="field-hint">List at least one service.</span>
+        </div>
+
+        <div class="field" id="field-hasLogo">
+          <label class="field-label" for="hasLogo">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="m4.93 4.93 14.14 14.14"/></svg>
+            Existing Logo?
+          </label>
+          <input class="field-input" type="text" id="hasLogo" name="HasLogo" placeholder="e.g. Yes / No / Yes but need a new one" autocorrect="off">
+          <span class="field-hint">Please answer the logo question.</span>
+        </div>
+
+        <div class="field" id="field-colors">
+          <label class="field-label" for="colors">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 22C6.49 22 2 17.52 2 12.01a9.94 9.94 0 0 1 2.04-6.07L12 2l7.96 3.94A9.94 9.94 0 0 1 22 12c0 5.52-4.48 10.01-10 10.01Z"/><path d="M12 2v20"/></svg>
+            Brand Colours
+          </label>
+          <input class="field-input" type="text" id="colors" name="Colors" placeholder="e.g. 60% grey, 30% gold, 10% black" autocorrect="off">
+          <span class="field-hint">Please provide your colour preferences.</span>
+        </div>
+
+        <div class="btn-row">
+          <button class="btn btn-ghost" type="button" id="btn-prev-2">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 12H5"/><path d="m12 19-7-7 7-7"/></svg>
+            Back
+          </button>
+          <button class="btn btn-primary" type="button" id="btn-next-2">
+            Continue
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+          </button>
+        </div>
+      </section>
+
+      <!-- Panel 4: Launch -->
+      <section class="panel" data-panel="3" aria-labelledby="p4-heading">
+        <p class="panel-counter"><span>4</span> / 4 — Final Details</p>
+        <div class="section-tag"><div class="section-tag-line"></div><span class="section-tag-label" id="p4-heading">Almost done</span><div class="section-tag-line"></div></div>
+
+        <div class="field" id="field-socialMedia">
+          <label class="field-label" for="socialMedia">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
+            Social Media / Links
+          </label>
+          <input class="field-input" type="text" id="socialMedia" name="SocialMedia" placeholder="e.g. instagram.com/mybiz, @mybiz_tw" autocorrect="off" autocapitalize="none">
+          <span class="field-hint">Please share at least one social or link.</span>
+        </div>
+
+        <div class="field" id="field-functionality">
+          <label class="field-label" for="functionality">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+            Features Needed
+          </label>
+          <input class="field-input" type="text" id="functionality" name="AddFeatures" placeholder="e.g. booking, contact form, gallery…" autocorrect="off">
+          <span class="field-hint">List the features you need.</span>
+        </div>
+
+        <div class="field" id="field-content">
+          <label class="field-label" for="content">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+            Message to Your Audience
+          </label>
+          <input class="field-input" type="text" id="content" name="PagesMessage" placeholder="e.g. 'Welcome — we make you look great'" autocorrect="off">
+          <span class="field-hint">Enter a message for your site visitors.</span>
+        </div>
+
+        <div class="btn-row">
+          <button class="btn btn-ghost" type="button" id="btn-prev-3">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 12H5"/><path d="m12 19-7-7 7-7"/></svg>
+            Back
+          </button>
+          <button class="btn btn-submit" type="button" id="btn-submit">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+            Submit Brief
+          </button>
+        </div>
+      </section>
+
+    </main>
+
+    <!-- Success Screen (hidden until submit) -->
+    <div id="success-screen" aria-live="assertive">
+      <div class="success-ring">
+        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#C9A84C" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>
+      </div>
+      <h2 class="success-title">Brief received.</h2>
+      <p class="success-body">Thanks! We've got your details and will be in touch shortly to get started.</p>
     </div>
+  </div>
 
-    <!-- Add more sections as needed -->
-    <div class="tab-pane" id="businessInfo">
-        <div class="query">
-            <div class="question" id="q7"><span class="fa ">🤝</span><br><p>List of services</p></div>
-            <div class="question" id="q8"><span class="fa ">💫</span><br><p>Do you have an existing logo</p></div>
-            <div class="question" id="q9"><span class="fa ">👩‍🎨</span><br><p>Provide 3 colors for your theme</div>
-        </div>
-        <div class="forms">
-          <a href="#q7" class="form-group">
-            <label class="label" for="ServiceList">👩‍🏫 :</label>
-            <input required onchange="changes(this)" oninvalid="handleError(this)" required name="ServiceList" type="text" class="form-control" id="ServiceList" placeholder=" (e.g., haircuts, styling, makeup)">
-          </a>
-     
-        <a href="#q8" class="form-group">
-            <label class="label" for="radio">🥨 :</label>
-            <input required onchange="changes(this)" oninvalid="handleError(this)" required name="HasLogo" type="text" class="form-control" id="radio" placeholder="eg. No,Yes,Yes but i might need another">
-          </a>
-          <a href="#q9" class="form-group">
-            <label class="label" for="colors">🎨 :</label>
-            <input class="form-control" id="colors" rows="3" placeholder="eg. 60% grey, 20% yellow, 10% brown" required onchange="changes(this)" oninvalid="handleError(this)" required name="Colors" type="text" />
-          </a>
-          <button  type="button" class="btn btn-primary" id="prevBusiness1">Previous</button>
-          <button  type="button" class="btn btn-primary" id="nextBusiness2">Next</button>
-        </div>
-      </div>
-  
-      <!-- Add more sections as needed -->
-    
-        <div class="tab-pane" id="businessInfo">
-        <div class="query">
-            <div class="question" id="q10"><span class="fa ">📸</span><br><p>Social media pages or contact?</p></div>
-            <div class="question" id="q11"><span class="fa ">🏵️</span><br><p>What feartures do you need?</p></div>
-            <div class="question" id="q12"><span class="fa ">💬</span><br><p>Messages to your audience on the website</p></div>
-        </div>
-            <div class="forms">
-              
-          <a href="#q10" class="form-group">
-            <label class="label" for="socialmedia">👥 :</label>
-            <input required onchange="changes(this)" oninvalid="handleError(this)" required type="text" name="SocialMedia" class="form-control" id="socialmedia" placeholder="Business pages, instagram,twitter.. and more">
-          </a>
-          <a href="#q11" class="form-group">
-            <label class="label" for="funcitonality">🏗️ :</label>
-            <input required onchange="changes(this)" oninvalid="handleError(this)" required type="text" name="AddFeatures" class="form-control" id="funcitonality" placeholder="eg.Booking systems,call, email.etc">
-          </a>
-          <a href="#q12" class="form-group">
-            <label class="label" for="content">🪧 :</label>
-            <input class="form-control" id="content" rows="3" placeholder="This message would be displayed on the site" required onchange="changes(this)" oninvalid="handleError(this)" required type="text" name="PagesMessage" />
-          </a>
-          <button   type="button" class="btn btn-primary" id="prevBusiness2">Previous</button>
-          <button    type="submit" class="btn btn-primary" value="Submit" id="nextBusiness3"> 
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="none" class="icon-sm transition-colors group-hover/button:text-brand-purple" width="16" height="16"><path d="M12.784 1.442a.8.8 0 0 0-1.569 0l-.191.953a.8.8 0 0 1-.628.628l-.953.19a.8.8 0 0 0 0 1.57l.953.19a.8.8 0 0 1 .628.629l.19.953a.8.8 0 0 0 1.57 0l.19-.953a.8.8 0 0 1 .629-.628l.953-.19a.8.8 0 0 0 0-1.57l-.953-.19a.8.8 0 0 1-.628-.629l-.19-.953h-.002ZM5.559 4.546a.8.8 0 0 0-1.519 0l-.546 1.64a.8.8 0 0 1-.507.507l-1.64.546a.8.8 0 0 0 0 1.519l1.64.547a.8.8 0 0 1 .507.505l.546 1.641a.8.8 0 0 0 1.519 0l.546-1.64a.8.8 0 0 1 .506-.507l1.641-.546a.8.8 0 0 0 0-1.519l-1.64-.546a.8.8 0 0 1-.507-.506L5.56 4.546Zm5.6 6.4a.8.8 0 0 0-1.519 0l-.147.44a.8.8 0 0 1-.505.507l-.441.146a.8.8 0 0 0 0 1.519l.44.146a.8.8 0 0 1 .507.506l.146.441a.8.8 0 0 0 1.519 0l.147-.44a.8.8 0 0 1 .506-.507l.44-.146a.8.8 0 0 0 0-1.519l-.44-.147a.8.8 0 0 1-.507-.505l-.146-.441Z" fill="currentColor"></path></svg>
-            Submit</button>
-        </div>
-      </div>
-   
-      <!-- Add more sections as needed -->
-    </form>
-</div>
-
-<script src="index.js"></script>
 
 </body>
 </html>
