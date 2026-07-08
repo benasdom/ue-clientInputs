@@ -3,16 +3,414 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>Unity Elites — Client Form</title>
+  <title>Unity Elites — Digital Services</title>
+  <meta name="description" content="Unity Elites — Professional websites and business feedback systems.">
+
+  <!-- Meta Pixel Code — REPLACE YOUR_PIXEL_ID -->
+  <script>
+    !function(f,b,e,v,n,t,s){if(f.fbq)return;n=f.fbq=function(){n.callMethod?
+    n.callMethod.apply(n,arguments):n.queue.push(arguments)};if(!f._fbq)f._fbq=n;
+    n.push=n;n.loaded=!0;n.version='2.0';n.queue=[];t=b.createElement(e);t.async=!0;
+    t.src=v;s=b.getElementsByTagName(e)[0];s.parentNode.insertBefore(t,s)}(window,
+    document,'script','https://connect.facebook.net/en_US/fbevents.js');
+    fbq('init', 'YOUR_PIXEL_ID'); // ← REPLACE with your Meta Pixel ID
+    fbq('track', 'PageView');
+  </script>
+  <noscript><img height="1" width="1" style="display:none"
+    src="https://www.facebook.com/tr?id=YOUR_PIXEL_ID&ev=PageView&noscript=1"/></noscript>
+  <!-- End Meta Pixel Code -->
+
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&display=swap" rel="stylesheet">
- <link rel="stylesheet" href="desktopview.css">
-  <script src="index.js" defer></script>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&family=Michroma&display=swap" rel="stylesheet">
+
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+
+    :root {
+      --cyan: #4ca8c9;
+      --cyan-light: #7ae3e8;
+      --cyan-dim: #4caac922;
+      --gold: #C9A84C;
+      --gold-dim: #C9A84C22;
+      --green: #4CAF80;
+      --green-dim: #4CAF8022;
+      --ink: #0D0F0E;
+      --ink-mid: #1E2120;
+      --ink-soft: #2E3330;
+      --surface: #141716;
+      --surface-raised: #1C1F1D;
+      --muted: #5A6360;
+      --muted-light: #8A9490;
+      --white: #F4F3EE;
+      --white-dim: rgba(244,243,238,0.06);
+      --white-border: rgba(244,243,238,0.10);
+      --error: #E05252;
+      --success: #4CAF80;
+      --radius: 16px;
+      --radius-sm: 10px;
+    }
+
+    html, body { height: 100%; background: var(--ink); color: var(--white); font-family: 'DM Sans', sans-serif; font-size: 15px; line-height: 1.6; overflow-x: hidden; -webkit-font-smoothing: antialiased; }
+
+    /* NOISE */
+    body::before { content: ''; position: fixed; inset: 0; background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E"); pointer-events: none; z-index: 0; }
+
+    /* ── LOADER ── */
+    #loader { position: fixed; inset: 0; background: var(--ink); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 20px; z-index: 2000; transition: opacity 0.6s ease, visibility 0.6s ease; }
+    #loader.hidden { opacity: 0; visibility: hidden; pointer-events: none; }
+    .loader-ring { width: 48px; height: 48px; border: 2px solid var(--white-border); border-top-color: var(--cyan); border-radius: 50%; animation: spin 0.8s linear infinite; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .loader-label { font-family: 'Michroma', sans-serif; font-size: 11px; font-weight: 600; letter-spacing: 0.18em; text-transform: uppercase; color: var(--muted-light); }
+
+    /* ── TOAST ── */
+    #toast { position: fixed; top: 20px; left: 50%; transform: translateX(-50%) translateY(-80px); background: var(--surface-raised); border: 1px solid var(--white-border); color: var(--white); padding: 12px 20px; border-radius: var(--radius-sm); font-size: 13px; white-space: nowrap; z-index: 1999; transition: transform 0.35s cubic-bezier(0.34,1.56,0.64,1); display: flex; align-items: center; gap: 10px; max-width: calc(100vw - 32px); }
+    #toast.show { transform: translateX(-50%) translateY(0); }
+    #toast.error { border-color: var(--error); color: var(--error); }
+    .toast-dot { width: 6px; height: 6px; border-radius: 50%; background: currentColor; flex-shrink: 0; }
+
+    /* ── SUBMITTING ── */
+    #submitting-overlay { display: none; position: fixed; inset: 0; background: rgba(13,15,14,0.85); z-index: 1500; align-items: center; justify-content: center; flex-direction: column; gap: 16px; backdrop-filter: blur(4px); }
+    #submitting-overlay.show { display: flex; }
+    .submitting-label { font-family: 'Michroma', sans-serif; font-size: 11px; font-weight: 600; letter-spacing: 0.18em; text-transform: uppercase; color: var(--muted-light); }
+
+    /* ── APP WRAPPER ── */
+    #app { position: relative; z-index: 1; min-height: 100dvh; display: flex; flex-direction: column; }
+
+    /* ══════════════════════════════════════════════
+       SCREEN SYSTEM — only one screen visible at a time
+    ══════════════════════════════════════════════ */
+    .screen { display: none; flex-direction: column; min-height: 100dvh; animation: fadeIn 0.45s ease; }
+    .screen.active { display: flex; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
+
+    /* ══════════════════════════════════════════════
+       SCREEN 0 — INTENT GATE (filter unserious traffic)
+    ══════════════════════════════════════════════ */
+    #screen-gate {
+      align-items: center;
+      justify-content: flex-start;
+      padding: 0;
+      overflow: hidden;
+    }
+
+    /* Animated SVG hero bg */
+    .gate-hero {
+      position: relative;
+      width: 100%;
+      min-height: 52vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+      flex-shrink: 0;
+    }
+    .gate-hero-svg {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+    }
+    .gate-hero-content {
+      position: relative;
+      z-index: 2;
+      text-align: center;
+      padding: 40px 24px 32px;
+    }
+    .gate-logo {
+      width: 80px;
+      height: 80px;
+      border-radius: 50%;
+      border: 2px solid var(--cyan);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 20px;
+      background: var(--surface-raised);
+      overflow: hidden;
+      animation: logoPop 0.8s cubic-bezier(0.34,1.56,0.64,1) 0.3s both;
+    }
+    @keyframes logoPop { from { transform: scale(0); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+    .gate-logo img { width: 100%; height: 100%; object-fit: cover; }
+    .gate-eyebrow { font-size: 10px; font-weight: 600; letter-spacing: 0.18em; text-transform: uppercase; color: var(--cyan); margin-bottom: 10px; }
+    .gate-title { font-family: 'Michroma', sans-serif; font-size: clamp(24px, 7vw, 38px); font-weight: 800; color: var(--white); line-height: 1.15; margin-bottom: 12px; }
+    .gate-title span { color: var(--cyan); }
+    .gate-sub { font-size: 14px; color: var(--muted-light); font-weight: 300; max-width: 300px; margin: 0 auto; }
+
+    .gate-body { padding: 28px 20px 40px; flex: 1; display: flex; flex-direction: column; gap: 16px; }
+
+    .gate-question { font-family: 'Michroma', sans-serif; font-size: 13px; letter-spacing: 0.06em; text-align: center; color: var(--white); margin-bottom: 4px; }
+
+    .gate-options { display: flex; flex-direction: column; gap: 10px; }
+
+    .gate-btn {
+      display: flex; align-items: center; gap: 14px;
+      padding: 16px 20px;
+      background: var(--surface-raised);
+      border: 1.5px solid var(--white-border);
+      border-radius: var(--radius);
+      cursor: pointer;
+      transition: all 0.2s ease;
+      text-align: left;
+    }
+    .gate-btn:active { transform: scale(0.98); }
+    .gate-btn.yes { border-color: var(--cyan); }
+    .gate-btn.yes:hover { background: var(--cyan-dim); }
+    .gate-btn.no { border-color: var(--white-border); }
+    .gate-btn.no:hover { border-color: var(--muted); background: var(--white-dim); }
+    .gate-btn-icon { width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+    .gate-btn.yes .gate-btn-icon { background: var(--cyan-dim); }
+    .gate-btn.no .gate-btn-icon { background: var(--white-dim); }
+    .gate-btn-text { flex: 1; }
+    .gate-btn-label { font-family: 'Michroma', sans-serif; font-size: 12px; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: var(--white); display: block; }
+    .gate-btn.no .gate-btn-label { color: var(--muted-light); }
+    .gate-btn-desc { font-size: 12px; color: var(--muted); font-weight: 300; display: block; margin-top: 2px; }
+
+    .gate-divider { display: flex; align-items: center; gap: 12px; }
+    .gate-divider-line { flex: 1; height: 1px; background: var(--white-border); }
+    .gate-divider-text { font-size: 10px; color: var(--muted); letter-spacing: 0.12em; text-transform: uppercase; }
+
+    /* Whatsapp CTA */
+    .wa-cta {
+      display: flex; align-items: center; justify-content: center; gap: 10px;
+      padding: 15px 20px;
+      background: #25D366;
+      color: #0D0F0E;
+      border: none;
+      border-radius: var(--radius-sm);
+      font-family: 'Michroma', sans-serif;
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      cursor: pointer;
+      text-decoration: none;
+      transition: all 0.2s ease;
+      width: 100%;
+    }
+    .wa-cta:hover { background: #1ebe5a; }
+    .wa-cta:active { transform: scale(0.97); }
+
+    /* ══════════════════════════════════════════════
+       SCREEN 1 — INFO (for "not sure" traffic)
+    ══════════════════════════════════════════════ */
+    #screen-info { padding: 0; }
+    .info-header {
+      padding: 40px 24px 28px;
+      background: linear-gradient(180deg, var(--surface) 0%, transparent 100%);
+      text-align: center;
+    }
+    .info-back { display: flex; align-items: center; gap: 8px; background: none; border: none; color: var(--muted-light); font-family: 'DM Sans', sans-serif; font-size: 13px; cursor: pointer; margin-bottom: 20px; padding: 0; }
+    .info-back svg { flex-shrink: 0; }
+    .info-eyebrow { font-size: 10px; font-weight: 600; letter-spacing: 0.18em; text-transform: uppercase; color: var(--gold); margin-bottom: 10px; }
+    .info-title { font-family: 'Michroma', sans-serif; font-size: clamp(20px, 6vw, 28px); font-weight: 800; color: var(--white); line-height: 1.2; margin-bottom: 12px; }
+    .info-sub { font-size: 14px; color: var(--muted-light); font-weight: 300; }
+
+    .info-body { flex: 1; padding: 20px 20px 40px; display: flex; flex-direction: column; gap: 16px; }
+
+    .info-card { background: var(--surface-raised); border: 1.5px solid var(--white-border); border-radius: var(--radius); padding: 20px; }
+    .info-card-head { display: flex; align-items: center; gap: 12px; margin-bottom: 12px; }
+    .info-card-icon { width: 36px; height: 36px; border-radius: var(--radius-sm); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+    .info-card-icon.cyan { background: var(--cyan-dim); }
+    .info-card-icon.gold { background: var(--gold-dim); }
+    .info-card-icon.green { background: var(--green-dim); }
+    .info-card-title { font-family: 'Michroma', sans-serif; font-size: 13px; font-weight: 700; letter-spacing: 0.04em; color: var(--white); }
+    .info-card-body { font-size: 13px; color: var(--muted-light); line-height: 1.7; }
+    .info-card-list { list-style: none; display: flex; flex-direction: column; gap: 8px; margin-top: 10px; }
+    .info-card-list li { display: flex; align-items: flex-start; gap: 8px; font-size: 13px; color: var(--muted-light); }
+    .info-card-list li::before { content: '→'; color: var(--cyan); flex-shrink: 0; font-size: 12px; margin-top: 2px; }
+
+    .info-cta-area { display: flex; flex-direction: column; gap: 10px; margin-top: 4px; }
+    .info-cta-label { font-size: 12px; color: var(--muted); text-align: center; }
+
+    /* ══════════════════════════════════════════════
+       SCREEN 2 — FORM CHOOSER CARDS
+    ══════════════════════════════════════════════ */
+    #screen-chooser { padding: 0; }
+    .chooser-header { padding: 36px 24px 24px; }
+    .chooser-back { display: flex; align-items: center; gap: 8px; background: none; border: none; color: var(--muted-light); font-family: 'DM Sans', sans-serif; font-size: 13px; cursor: pointer; margin-bottom: 20px; padding: 0; }
+    .chooser-eyebrow { font-size: 10px; font-weight: 600; letter-spacing: 0.18em; text-transform: uppercase; color: var(--cyan); margin-bottom: 8px; }
+    .chooser-title { font-family: 'Michroma', sans-serif; font-size: clamp(20px, 6vw, 28px); font-weight: 800; color: var(--white); line-height: 1.2; margin-bottom: 8px; }
+    .chooser-sub { font-size: 13px; color: var(--muted-light); }
+
+    .chooser-cards { padding: 0 20px 40px; display: flex; flex-direction: column; gap: 14px; flex: 1; }
+
+    .form-card {
+      position: relative;
+      background: var(--surface-raised);
+      border: 1.5px solid var(--white-border);
+      border-radius: var(--radius);
+      padding: 22px;
+      cursor: pointer;
+      overflow: hidden;
+      transition: all 0.25s ease;
+    }
+    .form-card:active { transform: scale(0.98); }
+    .form-card.website { border-color: rgba(76, 168, 201, 0.3); }
+    .form-card.website:hover { border-color: var(--cyan); background: var(--cyan-dim); }
+    .form-card.feedback { border-color: rgba(201, 168, 76, 0.3); }
+    .form-card.feedback:hover { border-color: var(--gold); background: var(--gold-dim); }
+
+    /* animated gradient sweep on hover */
+    .form-card::before { content: ''; position: absolute; inset: 0; background: linear-gradient(135deg, rgba(255,255,255,0.04) 0%, transparent 50%); pointer-events: none; }
+
+    .card-svg-bg { position: absolute; right: -10px; bottom: -10px; opacity: 0.07; }
+
+    .card-top { display: flex; align-items: flex-start; gap: 14px; margin-bottom: 16px; }
+    .card-icon { width: 46px; height: 46px; border-radius: 12px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+    .form-card.website .card-icon { background: var(--cyan-dim); border: 1px solid rgba(76,168,201,0.3); }
+    .form-card.feedback .card-icon { background: var(--gold-dim); border: 1px solid rgba(201,168,76,0.3); }
+    .card-info { flex: 1; }
+    .card-tag { font-size: 10px; font-weight: 600; letter-spacing: 0.14em; text-transform: uppercase; margin-bottom: 4px; }
+    .form-card.website .card-tag { color: var(--cyan); }
+    .form-card.feedback .card-tag { color: var(--gold); }
+    .card-title { font-family: 'Michroma', sans-serif; font-size: 16px; font-weight: 700; color: var(--white); line-height: 1.25; }
+
+    .card-desc { font-size: 13px; color: var(--muted-light); line-height: 1.7; margin-bottom: 14px; }
+
+    .card-pills { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 16px; }
+    .card-pill { font-size: 10px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; padding: 4px 10px; border-radius: 100px; }
+    .form-card.website .card-pill { background: var(--cyan-dim); color: var(--cyan); border: 1px solid rgba(76,168,201,0.2); }
+    .form-card.feedback .card-pill { background: var(--gold-dim); color: var(--gold); border: 1px solid rgba(201,168,76,0.2); }
+
+    .card-cta { display: flex; align-items: center; justify-content: space-between; }
+    .card-cta-label { font-family: 'Michroma', sans-serif; font-size: 12px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; }
+    .form-card.website .card-cta-label { color: var(--cyan); }
+    .form-card.feedback .card-cta-label { color: var(--gold); }
+    .card-arrow { display: flex; align-items: center; justify-content: center; width: 32px; height: 32px; border-radius: 50%; transition: transform 0.2s ease; }
+    .form-card.website .card-arrow { background: var(--cyan-dim); }
+    .form-card.feedback .card-arrow { background: var(--gold-dim); }
+    .form-card:hover .card-arrow { transform: translateX(4px); }
+
+    /* Or contact directly strip */
+    .chooser-wa { padding: 0 20px 20px; }
+    .chooser-wa-text { font-size: 12px; color: var(--muted); text-align: center; margin-bottom: 10px; }
+
+    /* ══════════════════════════════════════════════
+       SCREEN 3 — WEBSITE FORM (4-panel wizard)
+    ══════════════════════════════════════════════ */
+    #screen-website { padding: 0; }
+
+    /* ══════════════════════════════════════════════
+       SCREEN 4 — FEEDBACK FORM
+    ══════════════════════════════════════════════ */
+    #screen-feedback { padding: 0; }
+
+    /* ══════════════════════════════════════════════
+       SHARED FORM STYLES (used by both forms)
+    ══════════════════════════════════════════════ */
+    .form-header { padding: 32px 24px 20px; }
+    .form-back { display: flex; align-items: center; gap: 8px; background: none; border: none; color: var(--muted-light); font-family: 'DM Sans', sans-serif; font-size: 13px; cursor: pointer; margin-bottom: 16px; padding: 0; }
+    .form-eyebrow { font-size: 10px; font-weight: 600; letter-spacing: 0.18em; text-transform: uppercase; margin-bottom: 6px; }
+    .form-title { font-family: 'Michroma', sans-serif; font-size: clamp(20px, 6vw, 26px); font-weight: 800; color: var(--white); line-height: 1.2; margin-bottom: 6px; }
+    .form-sub { font-size: 13px; color: var(--muted-light); }
+
+    /* Progress */
+    .progress-bar-wrap { padding: 0 24px; margin-bottom: 24px; }
+    .progress-bar-track { height: 2px; background: var(--white-border); border-radius: 2px; overflow: hidden; }
+    .progress-bar-fill { height: 100%; border-radius: 2px; transition: width 0.4s cubic-bezier(0.4,0,0.2,1); }
+    .progress-bar-fill.cyan { background: var(--cyan); }
+    .progress-bar-fill.gold { background: var(--gold); }
+
+    /* Stepper */
+    .stepper { display: flex; align-items: center; padding: 0 24px; gap: 0; margin-bottom: 28px; }
+    .step-item { display: flex; flex-direction: column; align-items: center; gap: 6px; flex: 1; position: relative; cursor: pointer; }
+    .step-item:not(:last-child)::after { content: ''; position: absolute; top: 16px; left: calc(50% + 16px); right: calc(-50% + 16px); height: 1px; background: var(--white-border); transition: background 0.4s ease; }
+    .step-item.done.cyan-step:not(:last-child)::after { background: var(--cyan); }
+    .step-item.done.gold-step:not(:last-child)::after { background: var(--gold); }
+    .step-dot { width: 32px; height: 32px; border-radius: 50%; border: 1.5px solid var(--white-border); display: flex; align-items: center; justify-content: center; font-family: 'Michroma', sans-serif; font-size: 12px; font-weight: 700; color: var(--muted); background: var(--ink-mid); transition: all 0.3s ease; }
+    .step-item.active.cyan-step .step-dot { border-color: var(--cyan); color: var(--cyan); background: var(--cyan-dim); }
+    .step-item.done.cyan-step .step-dot { border-color: var(--cyan); background: var(--cyan); color: var(--ink); }
+    .step-item.active.gold-step .step-dot { border-color: var(--gold); color: var(--gold); background: var(--gold-dim); }
+    .step-item.done.gold-step .step-dot { border-color: var(--gold); background: var(--gold); color: var(--ink); }
+    .step-label { font-size: 9px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); transition: color 0.3s; }
+    .step-item.active.cyan-step .step-label { color: var(--cyan); }
+    .step-item.done.cyan-step .step-label { color: var(--muted-light); }
+    .step-item.active.gold-step .step-label { color: var(--gold); }
+    .step-item.done.gold-step .step-label { color: var(--muted-light); }
+
+    /* Panel system */
+    .form-shell { flex: 1; padding: 0 16px 32px; position: relative; overflow: hidden; }
+    .panel { position: absolute; inset: 0; padding: 0 8px; display: flex; flex-direction: column; gap: 14px; opacity: 0; pointer-events: none; transform: translateX(32px); transition: opacity 0.35s ease, transform 0.35s ease; }
+    .panel.active { position: relative; opacity: 1; pointer-events: all; transform: translateX(0); }
+    .panel.exit-left { opacity: 0; transform: translateX(-32px); }
+
+    /* Fields */
+    .section-tag { display: flex; align-items: center; gap: 10px; margin-bottom: 4px; }
+    .section-tag-line { height: 1px; flex: 1; background: var(--white-border); }
+    .section-tag-label { font-size: 10px; font-weight: 600; letter-spacing: 0.14em; text-transform: uppercase; color: var(--muted); }
+    .panel-counter { font-size: 11px; color: var(--muted); letter-spacing: 0.06em; margin-bottom: -4px; }
+    .panel-counter span { font-weight: 600; }
+    .panel-counter span.cyan { color: var(--cyan); }
+    .panel-counter span.gold { color: var(--gold); }
+
+    .field { display: flex; flex-direction: column; gap: 7px; }
+    .field-label { display: flex; align-items: center; gap: 8px; font-size: 11px; font-weight: 600; letter-spacing: 0.10em; text-transform: uppercase; color: var(--muted-light); }
+    .field-label svg { flex-shrink: 0; opacity: 0.6; }
+    .field-input { width: 100%; background: var(--surface-raised); border: 1.5px solid var(--white-border); border-radius: var(--radius-sm); padding: 14px 16px; font-family: 'DM Sans', sans-serif; font-size: 15px; font-weight: 400; color: var(--white); outline: none; transition: border-color 0.2s ease, background 0.2s ease; -webkit-appearance: none; appearance: none; -webkit-border-radius: var(--radius-sm); }
+    .field-input::placeholder { color: var(--muted); font-weight: 300; }
+    .field-input:focus { background: var(--ink-soft); }
+    .field-input.cyan:focus { border-color: var(--cyan); }
+    .field-input.gold:focus { border-color: var(--gold); }
+    .field-input.error { border-color: var(--error); animation: shake 0.35s ease; }
+    @keyframes shake { 0%,100% { transform: translateX(0); } 20%,60% { transform: translateX(-4px); } 40%,80% { transform: translateX(4px); } }
+    .field-hint { font-size: 11px; color: var(--error); display: none; padding-left: 2px; }
+    .field.has-error .field-hint { display: block; }
+
+    /* Star rating */
+    .star-row { display: flex; gap: 6px; }
+    .star-btn { background: none; border: none; cursor: pointer; padding: 4px; transition: transform 0.15s ease; }
+    .star-btn:active { transform: scale(1.3); }
+    .star-btn svg { transition: fill 0.15s ease, stroke 0.15s ease; }
+    .star-btn.filled svg { fill: var(--gold); stroke: var(--gold); }
+    .star-btn:not(.filled) svg { fill: none; stroke: var(--muted); }
+
+    /* Radio pills */
+    .radio-pills { display: flex; flex-wrap: wrap; gap: 8px; }
+    .radio-pill { display: flex; align-items: center; gap: 6px; padding: 8px 14px; border: 1.5px solid var(--white-border); border-radius: 100px; cursor: pointer; transition: all 0.2s ease; font-size: 13px; color: var(--muted-light); background: none; }
+    .radio-pill.selected-gold { border-color: var(--gold); background: var(--gold-dim); color: var(--gold); }
+    .radio-pill.selected-cyan { border-color: var(--cyan); background: var(--cyan-dim); color: var(--cyan); }
+    .radio-pill:active { transform: scale(0.97); }
+
+    /* Buttons */
+    .btn-row { display: flex; gap: 10px; padding-top: 8px; margin-top: auto; }
+    .btn { flex: 1; padding: 15px 20px; border-radius: var(--radius-sm); font-family: 'Michroma', sans-serif; font-size: 13px; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; transition: all 0.2s ease; -webkit-appearance: none; -webkit-tap-highlight-color: transparent; touch-action: manipulation; }
+    .btn:active { transform: scale(0.97); }
+    .btn-ghost { background: var(--white-dim); color: var(--muted-light); border: 1.5px solid var(--white-border); }
+    .btn-ghost:hover { background: rgba(244,243,238,0.10); color: var(--white); }
+    .btn-cyan { background: var(--cyan); color: var(--ink); }
+    .btn-cyan:hover { background: var(--cyan-light); }
+    .btn-gold { background: var(--gold); color: var(--ink); }
+    .btn-gold:hover { background: #d9b85a; }
+    .btn-submit-cyan { background: var(--cyan); color: var(--ink); position: relative; overflow: hidden; }
+    .btn-submit-cyan::before { content: ''; position: absolute; inset: 0; background: linear-gradient(135deg, rgba(255,255,255,0.15) 0%, transparent 60%); pointer-events: none; }
+    .btn-submit-gold { background: var(--gold); color: var(--ink); position: relative; overflow: hidden; }
+    .btn-submit-gold::before { content: ''; position: absolute; inset: 0; background: linear-gradient(135deg, rgba(255,255,255,0.15) 0%, transparent 60%); pointer-events: none; }
+
+    /* ── SUCCESS ── */
+    .success-screen { display: none; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 60px 32px; gap: 20px; min-height: 60vh; }
+    .success-screen.show { display: flex; }
+    .success-ring { width: 72px; height: 72px; border-radius: 50%; border: 2px solid var(--cyan); display: flex; align-items: center; justify-content: center; animation: pop 0.5s cubic-bezier(0.34,1.56,0.64,1); }
+    .success-ring.gold { border-color: var(--gold); }
+    @keyframes pop { 0% { transform: scale(0); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
+    .success-title { font-family: 'Michroma', sans-serif; font-size: 26px; font-weight: 800; color: var(--white); }
+    .success-body { font-size: 14px; color: var(--muted-light); font-weight: 300; max-width: 280px; line-height: 1.7; }
+    .success-wa { margin-top: 8px; }
+
+    /* ANIMATED SVG elements */
+    @keyframes orbit { from { transform: rotate(0deg) translateX(60px) rotate(0deg); } to { transform: rotate(360deg) translateX(60px) rotate(-360deg); } }
+    @keyframes orbit2 { from { transform: rotate(120deg) translateX(90px) rotate(-120deg); } to { transform: rotate(480deg) translateX(90px) rotate(-480deg); } }
+    @keyframes orbit3 { from { transform: rotate(240deg) translateX(45px) rotate(-240deg); } to { transform: rotate(600deg) translateX(45px) rotate(-600deg); } }
+    @keyframes pulse-ring { 0%,100% { r: 60; opacity: 0.08; } 50% { r: 75; opacity: 0.03; } }
+    @keyframes dash { to { stroke-dashoffset: 0; } }
+    @keyframes float-y { 0%,100% { transform: translateY(0px); } 50% { transform: translateY(-12px); } }
+    @keyframes glow { 0%,100% { opacity: 0.4; } 50% { opacity: 1; } }
+    @keyframes wave { 0% { d: path("M0,60 C60,40 120,80 180,60 S300,40 360,60 L360,120 L0,120 Z"); } 50% { d: path("M0,80 C60,60 120,100 180,80 S300,60 360,80 L360,120 L0,120 Z"); } 100% { d: path("M0,60 C60,40 120,80 180,60 S300,40 360,60 L360,120 L0,120 Z"); } }
+  </style>
 </head>
 <body>
 
-  <!-- Loading Screen -->
+  <!-- Loader -->
   <div id="loader">
     <div class="loader-ring"></div>
     <p class="loader-label">Unity Elites</p>
@@ -31,227 +429,1024 @@
   </div>
 
   <div id="app">
-    <!-- Header -->
-    <header class="header">
-      <p class="header-eyebrow">Client Brief</p>
-      <h1 class="header-title">Let's build<br>something great.</h1>
-      <p class="header-sub">Fill out the form — takes under 3 minutes.</p>
-    </header>
 
-    <!-- Progress -->
-    <div class="progress-bar-wrap">
-      <div class="progress-bar-track">
-        <div class="progress-bar-fill" id="progress-fill" style="width: 25%"></div>
+    <!-- ══════════════════════════════════════════════
+         SCREEN 0 — INTENT GATE
+    ══════════════════════════════════════════════ -->
+    <div id="screen-gate" class="screen active">
+
+      <!-- Animated Hero -->
+      <div class="gate-hero">
+        <svg class="gate-hero-svg" viewBox="0 0 375 280" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid slice">
+          <!-- Background gradient -->
+          <defs>
+            <radialGradient id="heroGrad" cx="50%" cy="50%" r="60%">
+              <stop offset="0%" stop-color="#4ca8c9" stop-opacity="0.18"/>
+              <stop offset="100%" stop-color="#0D0F0E" stop-opacity="0"/>
+            </radialGradient>
+            <filter id="blur4">
+              <feGaussianBlur stdDeviation="4"/>
+            </filter>
+          </defs>
+          <rect width="375" height="280" fill="url(#heroGrad)"/>
+          <!-- Pulsing rings -->
+          <circle cx="187" cy="130" r="60" fill="none" stroke="#4ca8c9" stroke-width="1" opacity="0.12">
+            <animate attributeName="r" values="60;80;60" dur="4s" repeatCount="indefinite"/>
+            <animate attributeName="opacity" values="0.12;0.04;0.12" dur="4s" repeatCount="indefinite"/>
+          </circle>
+          <circle cx="187" cy="130" r="90" fill="none" stroke="#4ca8c9" stroke-width="0.5" opacity="0.06">
+            <animate attributeName="r" values="90;110;90" dur="5s" repeatCount="indefinite"/>
+            <animate attributeName="opacity" values="0.06;0.02;0.06" dur="5s" repeatCount="indefinite"/>
+          </circle>
+          <circle cx="187" cy="130" r="120" fill="none" stroke="#4ca8c9" stroke-width="0.5" opacity="0.04">
+            <animate attributeName="r" values="120;140;120" dur="6s" repeatCount="indefinite"/>
+          </circle>
+          <!-- Orbiting dots -->
+          <g transform="translate(187,130)">
+            <circle r="4" fill="#4ca8c9" opacity="0.8">
+              <animateTransform attributeName="transform" type="rotate" from="0" to="360" dur="6s" repeatCount="indefinite"/>
+              <animateMotion path="M 70 0 A 70 70 0 1 1 69.99 0.01" dur="6s" repeatCount="indefinite"/>
+            </circle>
+          </g>
+          <g transform="translate(187,130)">
+            <circle r="3" fill="#7ae3e8" opacity="0.6">
+              <animateMotion path="M 0 -95 A 95 95 0 1 0 -0.01 -94.99" dur="9s" repeatCount="indefinite"/>
+            </circle>
+          </g>
+          <g transform="translate(187,130)">
+            <circle r="2" fill="#C9A84C" opacity="0.7">
+              <animateMotion path="M 50 0 A 50 50 0 1 1 49.99 0.01" dur="4s" repeatCount="indefinite"/>
+            </circle>
+          </g>
+          <!-- Grid lines -->
+          <line x1="0" y1="130" x2="375" y2="130" stroke="#4ca8c9" stroke-width="0.3" opacity="0.08" stroke-dasharray="4 8"/>
+          <line x1="187" y1="0" x2="187" y2="280" stroke="#4ca8c9" stroke-width="0.3" opacity="0.08" stroke-dasharray="4 8"/>
+          <!-- Floating icons -->
+          <g opacity="0.5">
+            <text x="40" y="55" font-size="18" fill="#4ca8c9">⬡</text>
+            <animateTransform attributeName="transform" type="translate" values="0,0;0,-6;0,0" dur="3.2s" repeatCount="indefinite"/>
+          </g>
+          <g opacity="0.4">
+            <text x="310" y="210" font-size="14" fill="#C9A84C">◆</text>
+            <animateTransform attributeName="transform" type="translate" values="0,0;0,8;0,0" dur="2.8s" repeatCount="indefinite"/>
+          </g>
+        </svg>
+
+        <div class="gate-hero-content">
+          <div class="gate-logo">
+            <img src="imgs/icon-c.png" alt="Unity Elites Logo" onerror="this.parentElement.innerHTML='<svg width=\'40\' height=\'40\' viewBox=\'0 0 24 24\' fill=\'none\' stroke=\'%234ca8c9\' stroke-width=\'1.5\'><polygon points=\'12,2 22,8.5 22,15.5 12,22 2,15.5 2,8.5\'/><circle cx=\'12\' cy=\'12\' r=\'4\'/></svg>'">
+          </div>
+          <p class="gate-eyebrow">Unity Elites</p>
+          <h1 class="gate-title">Digital solutions<br>for <span>real</span> businesses.</h1>
+          <p class="gate-sub">Websites. Feedback systems. Built for African businesses ready to grow.</p>
+        </div>
+      </div>
+
+      <!-- Intent question -->
+      <div class="gate-body">
+        <p class="gate-question">Are you looking for our services?</p>
+
+        <div class="gate-options">
+          <!-- YES — serious lead -->
+          <button class="gate-btn yes" id="btn-gate-yes">
+            <div class="gate-btn-icon">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#4ca8c9" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+            </div>
+            <div class="gate-btn-text">
+              <span class="gate-btn-label">Yes, I need your services</span>
+              <span class="gate-btn-desc">Take me to the forms or WhatsApp</span>
+            </div>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#4ca8c9" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+          </button>
+
+          <div class="gate-divider">
+            <div class="gate-divider-line"></div>
+            <span class="gate-divider-text">or</span>
+            <div class="gate-divider-line"></div>
+          </div>
+
+          <!-- NO — send to info page -->
+          <button class="gate-btn no" id="btn-gate-no">
+            <div class="gate-btn-icon">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#5A6360" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><path d="M12 17h.01"/></svg>
+            </div>
+            <div class="gate-btn-text">
+              <span class="gate-btn-label">Not sure — what do you do?</span>
+              <span class="gate-btn-desc">See what we offer before deciding</span>
+            </div>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#5A6360" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+          </button>
+        </div>
       </div>
     </div>
 
-    <!-- Stepper -->
-    <nav class="stepper" aria-label="Form steps">
-      <div class="step-item active" data-step="0" role="button" tabindex="0" aria-label="Step 1: You">
-        <div class="step-dot">1</div>
-        <span class="step-label">You</span>
+    <!-- ══════════════════════════════════════════════
+         SCREEN 1 — INFO (for unsure/cold traffic)
+    ══════════════════════════════════════════════ -->
+    <div id="screen-info" class="screen">
+      <div class="info-header">
+        <button class="info-back" id="btn-info-back">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5"/><path d="m12 19-7-7 7-7"/></svg>
+          Back
+        </button>
+        <p class="info-eyebrow">About Us</p>
+        <h2 class="info-title">What Unity Elites<br>actually does</h2>
+        <p class="info-sub">We build digital tools for real businesses — here's how we can help you.</p>
       </div>
-      <div class="step-item" data-step="1" role="button" tabindex="0" aria-label="Step 2: Business">
-        <div class="step-dot">2</div>
-        <span class="step-label">Business</span>
+
+      <div class="info-body">
+
+        <!-- Animated SVG explainer -->
+        <div style="width:100%;border-radius:var(--radius);overflow:hidden;background:var(--surface-raised);border:1.5px solid var(--white-border);">
+          <svg viewBox="0 0 340 160" xmlns="http://www.w3.org/2000/svg" style="width:100%;display:block;">
+            <defs>
+              <radialGradient id="infoGrad" cx="50%" cy="50%" r="70%">
+                <stop offset="0%" stop-color="#4ca8c9" stop-opacity="0.1"/>
+                <stop offset="100%" stop-color="#0D0F0E" stop-opacity="0"/>
+              </radialGradient>
+            </defs>
+            <rect width="340" height="160" fill="#1C1F1D"/>
+            <rect width="340" height="160" fill="url(#infoGrad)"/>
+            <!-- Web icon animated -->
+            <g transform="translate(60,80)">
+              <circle r="30" fill="none" stroke="#4ca8c9" stroke-width="1.5" opacity="0.6">
+                <animate attributeName="r" values="30;34;30" dur="3s" repeatCount="indefinite"/>
+                <animate attributeName="opacity" values="0.6;0.3;0.6" dur="3s" repeatCount="indefinite"/>
+              </circle>
+              <circle r="30" fill="none" stroke="#4ca8c9" stroke-width="1" opacity="0.3"/>
+              <ellipse rx="14" ry="30" fill="none" stroke="#4ca8c9" stroke-width="1" opacity="0.5"/>
+              <line x1="-30" y1="0" x2="30" y2="0" stroke="#4ca8c9" stroke-width="0.7" opacity="0.5"/>
+              <line x1="0" y1="-30" x2="0" y2="30" stroke="#4ca8c9" stroke-width="0.7" opacity="0.5"/>
+              <circle r="3" fill="#4ca8c9">
+                <animateMotion path="M 30 0 A 30 30 0 1 1 29.99 0.01" dur="4s" repeatCount="indefinite"/>
+              </circle>
+              <text y="50" text-anchor="middle" font-size="8" fill="#4ca8c9" font-family="Michroma" letter-spacing="1">WEBSITE</text>
+            </g>
+            <!-- Divider -->
+            <line x1="170" y1="20" x2="170" y2="140" stroke="#ffffff" stroke-width="0.5" opacity="0.08"/>
+            <!-- Feedback icon animated -->
+            <g transform="translate(255,80)">
+              <!-- Stars -->
+              <text x="-36" y="-30" font-size="10" fill="#C9A84C" opacity="0">★
+                <animate attributeName="opacity" values="0;1;0" dur="2s" begin="0s" repeatCount="indefinite"/>
+              </text>
+              <text x="-12" y="-38" font-size="10" fill="#C9A84C" opacity="0">★
+                <animate attributeName="opacity" values="0;1;0" dur="2s" begin="0.4s" repeatCount="indefinite"/>
+              </text>
+              <text x="12" y="-30" font-size="10" fill="#C9A84C" opacity="0">★
+                <animate attributeName="opacity" values="0;1;0" dur="2s" begin="0.8s" repeatCount="indefinite"/>
+              </text>
+              <!-- Chat bubble -->
+              <rect x="-28" y="-18" width="56" height="32" rx="8" fill="none" stroke="#C9A84C" stroke-width="1.5" opacity="0.7"/>
+              <line x1="-16" y1="-6" x2="16" y2="-6" stroke="#C9A84C" stroke-width="1" opacity="0.5"/>
+              <line x1="-16" y1="4" x2="8" y2="4" stroke="#C9A84C" stroke-width="1" opacity="0.5"/>
+              <polygon points="-10,14 -22,24 0,14" fill="#C9A84C" opacity="0.6"/>
+              <text y="50" text-anchor="middle" font-size="8" fill="#C9A84C" font-family="Michroma" letter-spacing="1">FEEDBACK</text>
+            </g>
+          </svg>
+        </div>
+
+        <div class="info-card">
+          <div class="info-card-head">
+            <div class="info-card-icon cyan">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#4ca8c9" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"/><path d="M2 12h20"/></svg>
+            </div>
+            <span class="info-card-title">Professional Website</span>
+          </div>
+          <div class="info-card-body">We design and build custom websites for businesses like yours — no templates, no shortcuts. Built to convert visitors into customers.</div>
+          <ul class="info-card-list">
+            <li>Clean, mobile-first design</li>
+            <li>Your brand colours & logo</li>
+            <li>Booking forms, galleries, contact pages</li>
+            <li>Delivered fast, built to last</li>
+          </ul>
+        </div>
+
+        <div class="info-card">
+          <div class="info-card-head">
+            <div class="info-card-icon gold">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#C9A84C" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+            </div>
+            <span class="info-card-title">Business Feedback System</span>
+          </div>
+          <div class="info-card-body">Let your customers rate you, leave compliments, complaints, and suggestions — all delivered straight to you on Telegram.</div>
+          <ul class="info-card-list">
+            <li>Star ratings + written feedback</li>
+            <li>Complaints, compliments, suggestions</li>
+            <li>Instant Telegram notifications</li>
+            <li>Anonymous or named submissions</li>
+          </ul>
+        </div>
+
+        <div class="info-card">
+          <div class="info-card-head">
+            <div class="info-card-icon green">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#4CAF80" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+            </div>
+            <span class="info-card-title">Why Unity Elites?</span>
+          </div>
+          <div class="info-card-body">We're a team based in Ghana, building specifically for businesses in Africa. We understand your market, your customers, and your budget.</div>
+        </div>
+
+        <div class="info-cta-area">
+          <p class="info-cta-label">Ready to get started?</p>
+          <a href="https://wa.me/0272831301?text=Hi%20Unity%20Elites%2C%20I%20want%20to%20learn%20more%20about%20your%20services"
+             class="wa-cta" id="info-wa-btn" target="_blank" rel="noopener">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/></svg>
+            Chat on WhatsApp
+          </a>
+          <button class="btn btn-ghost" style="font-size:12px;padding:12px;" id="btn-info-to-forms">
+            Or fill out a form
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+          </button>
+        </div>
       </div>
-      <div class="step-item" data-step="2" role="button" tabindex="0" aria-label="Step 3: Design">
-        <div class="step-dot">3</div>
-        <span class="step-label">Design</span>
-      </div>
-      <div class="step-item" data-step="3" role="button" tabindex="0" aria-label="Step 4: Launch">
-        <div class="step-dot">4</div>
-        <span class="step-label">Launch</span>
-      </div>
-    </nav>
-
-    <!-- Form -->
-    <main class="form-shell" id="form-shell">
-
-      <!-- Panel 1: Contact -->
-      <section class="panel active" data-panel="0" aria-labelledby="p1-heading">
-        <p class="panel-counter"><span>1</span> / 4 — Contact Info</p>
-        <div class="section-tag"><div class="section-tag-line"></div><span class="section-tag-label" id="p1-heading">About you</span><div class="section-tag-line"></div></div>
-
-        <div class="field" id="field-fullName">
-          <label class="field-label" for="fullName">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-            Full Name
-          </label>
-          <input class="field-input" type="text" id="fullName" name="Name" placeholder="e.g. Clark Kent" autocomplete="name" autocorrect="off" spellcheck="false">
-          <span class="field-hint">Please enter your full name.</span>
-        </div>
-
-        <div class="field" id="field-email">
-          <label class="field-label" for="email">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect width="20" height="16" x="2" y="4" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>
-            Email Address
-          </label>
-          <input class="field-input" type="email" id="email" name="Email" placeholder="e.g. you@domain.com" autocomplete="email" inputmode="email" autocapitalize="none" autocorrect="off" spellcheck="false">
-          <span class="field-hint">Enter a valid email address.</span>
-        </div>
-
-        <div class="field" id="field-phone">
-          <label class="field-label" for="phone">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 13 19.79 19.79 0 0 1 1.61 4.32a2 2 0 0 1 1.99-2.18h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 9.91a16 16 0 0 0 6.06 6.06l.92-.92a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
-            Phone Number
-          </label>
-          <input class="field-input" type="tel" id="phone" name="Phone" placeholder="e.g. 0244000000" autocomplete="tel" inputmode="tel">
-          <span class="field-hint">Enter a valid phone number.</span>
-        </div>
-
-        <div class="btn-row">
-          <button class="btn btn-primary" type="button" id="btn-next-0">
-            Continue
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
-          </button>
-        </div>
-      </section>
-
-      <!-- Panel 2: Business Info -->
-      <section class="panel" data-panel="1" aria-labelledby="p2-heading">
-        <p class="panel-counter"><span>2</span> / 4 — Business Details</p>
-        <div class="section-tag"><div class="section-tag-line"></div><span class="section-tag-label" id="p2-heading">Your business</span><div class="section-tag-line"></div></div>
-
-        <div class="field" id="field-businessName">
-          <label class="field-label" for="businessName">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect width="20" height="14" x="2" y="7" rx="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>
-            Business Name
-          </label>
-          <input class="field-input" type="text" id="businessName" name="BusinessName" placeholder="e.g. Unity Elites" autocomplete="organization" autocorrect="off">
-          <span class="field-hint">Enter your business name.</span>
-        </div>
-
-        <div class="field" id="field-businessLocation">
-          <label class="field-label" for="businessLocation">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg>
-            Business Location
-          </label>
-          <input class="field-input" type="text" id="businessLocation" name="BusinessLocation" placeholder="e.g. Accra, Ghana" autocomplete="address-level2" autocorrect="off">
-          <span class="field-hint">Enter your business location.</span>
-        </div>
-
-        <div class="field" id="field-websiteGoal">
-          <label class="field-label" for="websiteGoal">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"/><path d="M2 12h20"/></svg>
-            Site Purpose
-          </label>
-          <input class="field-input" type="text" id="websiteGoal" name="SitePurpose" placeholder="e.g. Sales, contacts, information…" autocorrect="off">
-          <span class="field-hint">Tell us what the site is for.</span>
-        </div>
-
-        <div class="btn-row">
-          <button class="btn btn-ghost" type="button" id="btn-prev-1">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 12H5"/><path d="m12 19-7-7 7-7"/></svg>
-            Back
-          </button>
-          <button class="btn btn-primary" type="button" id="btn-next-1">
-            Continue
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
-          </button>
-        </div>
-      </section>
-
-      <!-- Panel 3: Design -->
-      <section class="panel" data-panel="2" aria-labelledby="p3-heading">
-        <p class="panel-counter"><span>3</span> / 4 — Design & Brand</p>
-        <div class="section-tag"><div class="section-tag-line"></div><span class="section-tag-label" id="p3-heading">Your brand</span><div class="section-tag-line"></div></div>
-
-        <div class="field" id="field-serviceList">
-          <label class="field-label" for="serviceList">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
-            Services Offered
-          </label>
-          <input class="field-input" type="text" id="serviceList" name="ServiceList" placeholder="e.g. haircuts, styling, makeup" autocorrect="off">
-          <span class="field-hint">List at least one service.</span>
-        </div>
-
-        <div class="field" id="field-hasLogo">
-          <label class="field-label" for="hasLogo">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="m4.93 4.93 14.14 14.14"/></svg>
-            Existing Logo?
-          </label>
-          <input class="field-input" type="text" id="hasLogo" name="HasLogo" placeholder="e.g. Yes / No / Yes but need a new one" autocorrect="off">
-          <span class="field-hint">Please answer the logo question.</span>
-        </div>
-
-        <div class="field" id="field-colors">
-          <label class="field-label" for="colors">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 22C6.49 22 2 17.52 2 12.01a9.94 9.94 0 0 1 2.04-6.07L12 2l7.96 3.94A9.94 9.94 0 0 1 22 12c0 5.52-4.48 10.01-10 10.01Z"/><path d="M12 2v20"/></svg>
-            Brand Colours
-          </label>
-          <input class="field-input" type="text" id="colors" name="Colors" placeholder="e.g. 60% grey, 30% gold, 10% black" autocorrect="off">
-          <span class="field-hint">Please provide your colour preferences.</span>
-        </div>
-
-        <div class="btn-row">
-          <button class="btn btn-ghost" type="button" id="btn-prev-2">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 12H5"/><path d="m12 19-7-7 7-7"/></svg>
-            Back
-          </button>
-          <button class="btn btn-primary" type="button" id="btn-next-2">
-            Continue
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
-          </button>
-        </div>
-      </section>
-
-      <!-- Panel 4: Launch -->
-      <section class="panel" data-panel="3" aria-labelledby="p4-heading">
-        <p class="panel-counter"><span>4</span> / 4 — Final Details</p>
-        <div class="section-tag"><div class="section-tag-line"></div><span class="section-tag-label" id="p4-heading">Almost done</span><div class="section-tag-line"></div></div>
-
-        <div class="field" id="field-socialMedia">
-          <label class="field-label" for="socialMedia">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
-            Social Media / Links
-          </label>
-          <input class="field-input" type="text" id="socialMedia" name="SocialMedia" placeholder="e.g. instagram.com/mybiz, @mybiz_tw" autocorrect="off" autocapitalize="none">
-          <span class="field-hint">Please share at least one social or link.</span>
-        </div>
-
-        <div class="field" id="field-functionality">
-          <label class="field-label" for="functionality">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
-            Features Needed
-          </label>
-          <input class="field-input" type="text" id="functionality" name="AddFeatures" placeholder="e.g. booking, contact form, gallery…" autocorrect="off">
-          <span class="field-hint">List the features you need.</span>
-        </div>
-
-        <div class="field" id="field-content">
-          <label class="field-label" for="content">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
-            Message to Your Audience
-          </label>
-          <input class="field-input" type="text" id="content" name="PagesMessage" placeholder="e.g. 'Welcome — we make you look great'" autocorrect="off">
-          <span class="field-hint">Enter a message for your site visitors.</span>
-        </div>
-
-        <div class="btn-row">
-          <button class="btn btn-ghost" type="button" id="btn-prev-3">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 12H5"/><path d="m12 19-7-7 7-7"/></svg>
-            Back
-          </button>
-          <button class="btn btn-submit" type="button" id="btn-submit">
-            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
-            Submit Brief
-          </button>
-        </div>
-      </section>
-
-    </main>
-
-    <!-- Success Screen (hidden until submit) -->
-    <div id="success-screen" aria-live="assertive">
-      <div class="success-ring">
-        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#C9A84C" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>
-      </div>
-      <h2 class="success-title">Brief received.</h2>
-      <p class="success-body">Thanks! We've got your details and will be in touch shortly to get started.</p>
     </div>
-  </div>
 
+    <!-- ══════════════════════════════════════════════
+         SCREEN 2 — FORM CHOOSER
+    ══════════════════════════════════════════════ -->
+    <div id="screen-chooser" class="screen">
+      <div class="chooser-header">
+        <button class="chooser-back" id="btn-chooser-back">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5"/><path d="m12 19-7-7 7-7"/></svg>
+          Back
+        </button>
+        <p class="chooser-eyebrow">Get Started</p>
+        <h2 class="chooser-title">What do you need?</h2>
+        <p class="chooser-sub">Choose the form that matches your goal — or just chat with us directly.</p>
+      </div>
 
+      <div class="chooser-cards">
+
+        <!-- Website Card -->
+        <div class="form-card website" id="card-website" role="button" tabindex="0">
+          <!-- Decorative SVG -->
+          <svg class="card-svg-bg" width="100" height="100" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+            <circle cx="50" cy="50" r="48" fill="none" stroke="#4ca8c9" stroke-width="2"/>
+            <ellipse cx="50" cy="50" rx="22" ry="48" fill="none" stroke="#4ca8c9" stroke-width="1.5"/>
+            <line x1="2" y1="50" x2="98" y2="50" stroke="#4ca8c9" stroke-width="1"/>
+          </svg>
+          <div class="card-top">
+            <div class="card-icon">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#4ca8c9" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"/><path d="M2 12h20"/></svg>
+            </div>
+            <div class="card-info">
+              <span class="card-tag">Service 01</span>
+              <h3 class="card-title">Website<br>Design Brief</h3>
+            </div>
+          </div>
+          <p class="card-desc">Tell us about your business and we'll build you a professional website. Takes about 3 minutes to fill out.</p>
+          <div class="card-pills">
+            <span class="card-pill">Custom Design</span>
+            <span class="card-pill">Mobile-First</span>
+            <span class="card-pill">Fast Delivery</span>
+          </div>
+          <div class="card-cta">
+            <span class="card-cta-label">Start the brief</span>
+            <div class="card-arrow">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#4ca8c9" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+            </div>
+          </div>
+        </div>
+
+        <!-- Feedback Card -->
+        <div class="form-card feedback" id="card-feedback" role="button" tabindex="0">
+          <svg class="card-svg-bg" width="100" height="100" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+            <rect x="10" y="10" width="80" height="55" rx="12" fill="none" stroke="#C9A84C" stroke-width="2"/>
+            <line x1="25" y1="30" x2="75" y2="30" stroke="#C9A84C" stroke-width="1.5"/>
+            <line x1="25" y1="42" x2="60" y2="42" stroke="#C9A84C" stroke-width="1.5"/>
+            <polygon points="25,65 15,85 45,65" fill="#C9A84C"/>
+          </svg>
+          <div class="card-top">
+            <div class="card-icon">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#C9A84C" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+            </div>
+            <div class="card-info">
+              <span class="card-tag">Service 02</span>
+              <h3 class="card-title">Business Feedback<br>System</h3>
+            </div>
+          </div>
+          <p class="card-desc">Let your customers rate you, leave compliments, complaints, or suggestions — delivered straight to Telegram.</p>
+          <div class="card-pills">
+            <span class="card-pill">Star Ratings</span>
+            <span class="card-pill">Complaints</span>
+            <span class="card-pill">Suggestions</span>
+          </div>
+          <div class="card-cta">
+            <span class="card-cta-label">Set up feedback</span>
+            <div class="card-arrow">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#C9A84C" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <div class="chooser-wa">
+        <p class="chooser-wa-text">Prefer to talk first?</p>
+        <a href="https://wa.me/0272831301?text=Hi%20Unity%20Elites%2C%20I%27m%20interested%20in%20your%20services"
+           class="wa-cta" id="chooser-wa-btn" target="_blank" rel="noopener">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/></svg>
+          Chat on WhatsApp Instead
+        </a>
+      </div>
+    </div>
+
+    <!-- ══════════════════════════════════════════════
+         SCREEN 3 — WEBSITE FORM (4 panels)
+    ══════════════════════════════════════════════ -->
+    <div id="screen-website" class="screen">
+      <div class="form-header">
+        <button class="form-back" id="btn-website-back">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5"/><path d="m12 19-7-7 7-7"/></svg>
+          Back
+        </button>
+        <p class="form-eyebrow" style="color:var(--cyan)">Website Brief</p>
+        <h2 class="form-title">Let's build<br>something great.</h2>
+        <p class="form-sub">Takes under 3 minutes.</p>
+      </div>
+
+      <div class="progress-bar-wrap">
+        <div class="progress-bar-track">
+          <div class="progress-bar-fill cyan" id="w-progress-fill" style="width:25%"></div>
+        </div>
+      </div>
+
+      <nav class="stepper" aria-label="Website form steps">
+        <div class="step-item cyan-step active" data-w-step="0" role="button" tabindex="0" aria-label="Step 1">
+          <div class="step-dot">1</div>
+          <span class="step-label">You</span>
+        </div>
+        <div class="step-item cyan-step" data-w-step="1" role="button" tabindex="0" aria-label="Step 2">
+          <div class="step-dot">2</div>
+          <span class="step-label">Business</span>
+        </div>
+        <div class="step-item cyan-step" data-w-step="2" role="button" tabindex="0" aria-label="Step 3">
+          <div class="step-dot">3</div>
+          <span class="step-label">Design</span>
+        </div>
+        <div class="step-item cyan-step" data-w-step="3" role="button" tabindex="0" aria-label="Step 4">
+          <div class="step-dot">4</div>
+          <span class="step-label">Launch</span>
+        </div>
+      </nav>
+
+      <main class="form-shell" id="website-form-shell">
+
+        <!-- Panel 1 -->
+        <section class="panel active" data-panel="0">
+          <p class="panel-counter"><span class="cyan">1</span> / 4 — Contact Info</p>
+          <div class="section-tag"><div class="section-tag-line"></div><span class="section-tag-label">About you</span><div class="section-tag-line"></div></div>
+
+          <div class="field" id="wf-fullName">
+            <label class="field-label" for="w-fullName">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+              Full Name
+            </label>
+            <input class="field-input cyan" type="text" id="w-fullName" name="Name" placeholder="e.g. Clark Kent" autocomplete="name" autocorrect="off" spellcheck="false">
+            <span class="field-hint">Please enter your full name.</span>
+          </div>
+
+          <div class="field" id="wf-email">
+            <label class="field-label" for="w-email">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="16" x="2" y="4" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>
+              Email Address
+            </label>
+            <input class="field-input cyan" type="email" id="w-email" name="Email" placeholder="you@domain.com" autocomplete="email" inputmode="email" autocapitalize="none" autocorrect="off">
+            <span class="field-hint">Enter a valid email address.</span>
+          </div>
+
+          <div class="field" id="wf-phone">
+            <label class="field-label" for="w-phone">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 13 19.79 19.79 0 0 1 1.61 4.32a2 2 0 0 1 1.99-2.18h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 9.91a16 16 0 0 0 6.06 6.06l.92-.92a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+              Phone Number
+            </label>
+            <input class="field-input cyan" type="tel" id="w-phone" name="Phone" placeholder="e.g. 0244000000" autocomplete="tel" inputmode="tel">
+            <span class="field-hint">Enter a valid phone number.</span>
+          </div>
+
+          <div class="btn-row">
+            <button class="btn btn-cyan" type="button" id="w-btn-next-0">
+              Continue
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+            </button>
+          </div>
+        </section>
+
+        <!-- Panel 2 -->
+        <section class="panel" data-panel="1">
+          <p class="panel-counter"><span class="cyan">2</span> / 4 — Business Details</p>
+          <div class="section-tag"><div class="section-tag-line"></div><span class="section-tag-label">Your business</span><div class="section-tag-line"></div></div>
+
+          <div class="field" id="wf-businessName">
+            <label class="field-label" for="w-businessName">Business Name</label>
+            <input class="field-input cyan" type="text" id="w-businessName" name="BusinessName" placeholder="e.g. Unity Elites" autocomplete="organization">
+            <span class="field-hint">Enter your business name.</span>
+          </div>
+
+          <div class="field" id="wf-businessLocation">
+            <label class="field-label" for="w-businessLocation">Business Location</label>
+            <input class="field-input cyan" type="text" id="w-businessLocation" name="BusinessLocation" placeholder="e.g. Accra, Ghana" autocomplete="address-level2">
+            <span class="field-hint">Enter your business location.</span>
+          </div>
+
+          <div class="field" id="wf-websiteGoal">
+            <label class="field-label" for="w-websiteGoal">Site Purpose</label>
+            <input class="field-input cyan" type="text" id="w-websiteGoal" name="SitePurpose" placeholder="e.g. Sales, contacts, information…">
+            <span class="field-hint">Tell us what the site is for.</span>
+          </div>
+
+          <div class="btn-row">
+            <button class="btn btn-ghost" type="button" id="w-btn-prev-1">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5"/><path d="m12 19-7-7 7-7"/></svg>
+              Back
+            </button>
+            <button class="btn btn-cyan" type="button" id="w-btn-next-1">Continue <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg></button>
+          </div>
+        </section>
+
+        <!-- Panel 3 -->
+        <section class="panel" data-panel="2">
+          <p class="panel-counter"><span class="cyan">3</span> / 4 — Design & Brand</p>
+          <div class="section-tag"><div class="section-tag-line"></div><span class="section-tag-label">Your brand</span><div class="section-tag-line"></div></div>
+
+          <div class="field" id="wf-serviceList">
+            <label class="field-label" for="w-serviceList">Services Offered</label>
+            <input class="field-input cyan" type="text" id="w-serviceList" name="ServiceList" placeholder="e.g. haircuts, styling, makeup">
+            <span class="field-hint">List at least one service.</span>
+          </div>
+
+          <div class="field" id="wf-hasLogo">
+            <label class="field-label" for="w-hasLogo">Existing Logo?</label>
+            <input class="field-input cyan" type="text" id="w-hasLogo" name="HasLogo" placeholder="Yes / No / Yes but need a new one">
+            <span class="field-hint">Please answer the logo question.</span>
+          </div>
+
+          <div class="field" id="wf-colors">
+            <label class="field-label" for="w-colors">Brand Colours</label>
+            <input class="field-input cyan" type="text" id="w-colors" name="Colors" placeholder="e.g. 60% grey, 30% gold, 10% black">
+            <span class="field-hint">Please provide your colour preferences.</span>
+          </div>
+
+          <div class="btn-row">
+            <button class="btn btn-ghost" type="button" id="w-btn-prev-2">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5"/><path d="m12 19-7-7 7-7"/></svg>
+              Back
+            </button>
+            <button class="btn btn-cyan" type="button" id="w-btn-next-2">Continue <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg></button>
+          </div>
+        </section>
+
+        <!-- Panel 4 -->
+        <section class="panel" data-panel="3">
+          <p class="panel-counter"><span class="cyan">4</span> / 4 — Final Details</p>
+          <div class="section-tag"><div class="section-tag-line"></div><span class="section-tag-label">Almost done</span><div class="section-tag-line"></div></div>
+
+          <div class="field" id="wf-socialMedia">
+            <label class="field-label" for="w-socialMedia">Social Media / Links</label>
+            <input class="field-input cyan" type="text" id="w-socialMedia" name="SocialMedia" placeholder="e.g. instagram.com/mybiz" autocapitalize="none">
+            <span class="field-hint">Please share at least one social or link.</span>
+          </div>
+
+          <div class="field" id="wf-functionality">
+            <label class="field-label" for="w-functionality">Features Needed</label>
+            <input class="field-input cyan" type="text" id="w-functionality" name="AddFeatures" placeholder="e.g. booking, contact form, gallery…">
+            <span class="field-hint">List the features you need.</span>
+          </div>
+
+          <div class="field" id="wf-content">
+            <label class="field-label" for="w-content">Message to Your Audience</label>
+            <input class="field-input cyan" type="text" id="w-content" name="PagesMessage" placeholder="e.g. 'Welcome — we make you look great'">
+            <span class="field-hint">Enter a message for your site visitors.</span>
+          </div>
+
+          <div class="btn-row">
+            <button class="btn btn-ghost" type="button" id="w-btn-prev-3">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5"/><path d="m12 19-7-7 7-7"/></svg>
+              Back
+            </button>
+            <button class="btn btn-submit-cyan" type="button" id="w-btn-submit">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+              Submit Brief
+            </button>
+          </div>
+        </section>
+
+      </main>
+
+      <!-- Success -->
+      <div id="w-success" class="success-screen">
+        <div class="success-ring">
+          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#4ca8c9" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+        </div>
+        <h2 class="success-title">Brief received.</h2>
+        <p class="success-body">Thanks! We've got your details and will be in touch shortly to get started on your website.</p>
+        <a href="https://wa.me/0272831301?text=Hi%21%20I%20just%20submitted%20my%20website%20brief%20on%20your%20site"
+           class="wa-cta success-wa" style="max-width:320px" target="_blank" rel="noopener">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/></svg>
+          Follow up on WhatsApp
+        </a>
+      </div>
+    </div>
+
+    <!-- ══════════════════════════════════════════════
+         SCREEN 4 — FEEDBACK FORM (3 panels)
+    ══════════════════════════════════════════════ -->
+    <div id="screen-feedback" class="screen">
+      <div class="form-header">
+        <button class="form-back" id="btn-feedback-back">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5"/><path d="m12 19-7-7 7-7"/></svg>
+          Back
+        </button>
+        <p class="form-eyebrow" style="color:var(--gold)">Feedback System</p>
+        <h2 class="form-title">Set up customer<br>feedback.</h2>
+        <p class="form-sub">Tell us about your business — takes 2 minutes.</p>
+      </div>
+
+      <div class="progress-bar-wrap">
+        <div class="progress-bar-track">
+          <div class="progress-bar-fill gold" id="f-progress-fill" style="width:33%"></div>
+        </div>
+      </div>
+
+      <nav class="stepper" aria-label="Feedback form steps">
+        <div class="step-item gold-step active" data-f-step="0" role="button" tabindex="0">
+          <div class="step-dot">1</div>
+          <span class="step-label">Business</span>
+        </div>
+        <div class="step-item gold-step" data-f-step="1" role="button" tabindex="0">
+          <div class="step-dot">2</div>
+          <span class="step-label">Setup</span>
+        </div>
+        <div class="step-item gold-step" data-f-step="2" role="button" tabindex="0">
+          <div class="step-dot">3</div>
+          <span class="step-label">Contact</span>
+        </div>
+      </nav>
+
+      <main class="form-shell" id="feedback-form-shell">
+
+        <!-- Panel 1: Business Info -->
+        <section class="panel active" data-fpanel="0">
+          <p class="panel-counter"><span class="gold">1</span> / 3 — Your Business</p>
+          <div class="section-tag"><div class="section-tag-line"></div><span class="section-tag-label">Business details</span><div class="section-tag-line"></div></div>
+
+          <div class="field" id="ff-bizName">
+            <label class="field-label" for="f-bizName">Business Name</label>
+            <input class="field-input gold" type="text" id="f-bizName" name="BusinessName" placeholder="e.g. Kwame's Barber Shop" autocomplete="organization">
+            <span class="field-hint">Enter your business name.</span>
+          </div>
+
+          <div class="field" id="ff-bizType">
+            <label class="field-label" for="f-bizType">Business Type</label>
+            <input class="field-input gold" type="text" id="f-bizType" name="BusinessType" placeholder="e.g. Restaurant, Salon, Pharmacy…">
+            <span class="field-hint">Enter your type of business.</span>
+          </div>
+
+          <div class="field" id="ff-bizLocation">
+            <label class="field-label" for="f-bizLocation">Location</label>
+            <input class="field-input gold" type="text" id="f-bizLocation" name="Location" placeholder="e.g. East Legon, Accra">
+            <span class="field-hint">Enter your location.</span>
+          </div>
+
+          <div class="btn-row">
+            <button class="btn btn-gold" type="button" id="f-btn-next-0">Continue <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg></button>
+          </div>
+        </section>
+
+        <!-- Panel 2: System Setup -->
+        <section class="panel" data-fpanel="1">
+          <p class="panel-counter"><span class="gold">2</span> / 3 — Feedback Setup</p>
+          <div class="section-tag"><div class="section-tag-line"></div><span class="section-tag-label">Configure</span><div class="section-tag-line"></div></div>
+
+          <div class="field" id="ff-feedbackTypes">
+            <label class="field-label">Feedback types you want</label>
+            <div class="radio-pills" id="feedback-type-pills">
+              <button type="button" class="radio-pill selected-gold" data-val="Complaints">😤 Complaints</button>
+              <button type="button" class="radio-pill selected-gold" data-val="Compliments">😊 Compliments</button>
+              <button type="button" class="radio-pill selected-gold" data-val="Suggestions">💡 Suggestions</button>
+              <button type="button" class="radio-pill selected-gold" data-val="Star Ratings">⭐ Star Ratings</button>
+              <button type="button" class="radio-pill selected-gold" data-val="General">📝 General</button>
+            </div>
+            <input type="hidden" id="f-feedbackTypes" name="FeedbackTypes">
+            <span class="field-hint" id="ff-feedbackTypes-hint">Select at least one type.</span>
+          </div>
+
+          <div class="field" id="ff-anonymous">
+            <label class="field-label">Allow anonymous feedback?</label>
+            <div class="radio-pills" id="anon-pills">
+              <button type="button" class="radio-pill selected-gold" data-anon="Yes" id="anon-yes">Yes — allow it</button>
+              <button type="button" class="radio-pill" data-anon="No" id="anon-no">No — require name</button>
+            </div>
+            <input type="hidden" id="f-anonymous" name="AllowAnonymous" value="Yes">
+          </div>
+
+          <div class="field" id="ff-telegramHandle">
+            <label class="field-label" for="f-telegramHandle">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+              Your Telegram Username
+            </label>
+            <input class="field-input gold" type="text" id="f-telegramHandle" name="TelegramHandle" placeholder="e.g. @mybusiness_bot or @myusername" autocapitalize="none" autocorrect="off">
+            <span class="field-hint">We need this to route feedback to you.</span>
+          </div>
+
+          <div class="btn-row">
+            <button class="btn btn-ghost" type="button" id="f-btn-prev-1">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5"/><path d="m12 19-7-7 7-7"/></svg>
+              Back
+            </button>
+            <button class="btn btn-gold" type="button" id="f-btn-next-1">Continue <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg></button>
+          </div>
+        </section>
+
+        <!-- Panel 3: Owner Contact -->
+        <section class="panel" data-fpanel="2">
+          <p class="panel-counter"><span class="gold">3</span> / 3 — Your Contact</p>
+          <div class="section-tag"><div class="section-tag-line"></div><span class="section-tag-label">About you</span><div class="section-tag-line"></div></div>
+
+          <div class="field" id="ff-ownerName">
+            <label class="field-label" for="f-ownerName">Your Name</label>
+            <input class="field-input gold" type="text" id="f-ownerName" name="OwnerName" placeholder="e.g. Kwame Mensah" autocomplete="name">
+            <span class="field-hint">Please enter your name.</span>
+          </div>
+
+          <div class="field" id="ff-ownerPhone">
+            <label class="field-label" for="f-ownerPhone">Phone / WhatsApp</label>
+            <input class="field-input gold" type="tel" id="f-ownerPhone" name="OwnerPhone" placeholder="e.g. 0244000000" autocomplete="tel" inputmode="tel">
+            <span class="field-hint">Enter a valid phone number.</span>
+          </div>
+
+          <div class="field" id="ff-extra">
+            <label class="field-label" for="f-extra">Anything else to add?</label>
+            <input class="field-input gold" type="text" id="f-extra" name="ExtraNotes" placeholder="Any special requirements or questions…">
+            <span class="field-hint"></span>
+          </div>
+
+          <div class="btn-row">
+            <button class="btn btn-ghost" type="button" id="f-btn-prev-2">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5"/><path d="m12 19-7-7 7-7"/></svg>
+              Back
+            </button>
+            <button class="btn btn-submit-gold" type="button" id="f-btn-submit">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+              Submit
+            </button>
+          </div>
+        </section>
+
+      </main>
+
+      <!-- Success -->
+      <div id="f-success" class="success-screen">
+        <div class="success-ring gold">
+          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#C9A84C" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+        </div>
+        <h2 class="success-title">Request received.</h2>
+        <p class="success-body">We'll set up your customer feedback system and be in touch within 24 hours.</p>
+        <a href="https://wa.me/0272831301?text=Hi%21%20I%20just%20submitted%20a%20feedback%20system%20request"
+           class="wa-cta success-wa" style="max-width:320px;background:#C9A84C" target="_blank" rel="noopener">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/></svg>
+          Follow up on WhatsApp
+        </a>
+      </div>
+    </div>
+
+  </div><!-- /#app -->
+
+  <script>
+  (function() {
+
+    /* ══════════════════════════════════════════════
+       CONFIG — REPLACE THESE VALUES
+    ══════════════════════════════════════════════ */
+    const TELEGRAM_TOKEN = "6380651581:AAEbYC16pgwkCUAF0s44j4nblpbVUX31ebY"; // ← your bot token (already set)
+    const TELEGRAM_CHAT  = "815965867"; // ← your chat ID (already set)
+    const WHATSAPP_NUMBER = "0272831301"; // ← e.g. "233244000000" (no + or spaces)
+    /* Meta Pixel ID is in the <head> — search for YOUR_PIXEL_ID above */
+
+    /* ══════════════════════════════════════════════
+       SCREEN ROUTER
+    ══════════════════════════════════════════════ */
+    const screens = {
+      gate:     document.getElementById('screen-gate'),
+      info:     document.getElementById('screen-info'),
+      chooser:  document.getElementById('screen-chooser'),
+      website:  document.getElementById('screen-website'),
+      feedback: document.getElementById('screen-feedback'),
+    };
+
+    function showScreen(name) {
+      Object.values(screens).forEach(s => s.classList.remove('active'));
+      screens[name].classList.add('active');
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    /* ── GATE ── */
+    document.getElementById('btn-gate-yes').addEventListener('click', () => {
+      trackEvent('Lead_Interested');
+      showScreen('chooser');
+    });
+    document.getElementById('btn-gate-no').addEventListener('click', () => {
+      trackEvent('Lead_Curious');
+      showScreen('info');
+    });
+
+    /* ── INFO ── */
+    document.getElementById('btn-info-back').addEventListener('click', () => showScreen('gate'));
+    document.getElementById('btn-info-to-forms').addEventListener('click', () => showScreen('chooser'));
+    document.getElementById('info-wa-btn').addEventListener('click', () => trackEvent('WhatsApp_Click_Info'));
+
+    /* ── CHOOSER ── */
+    document.getElementById('btn-chooser-back').addEventListener('click', () => showScreen('gate'));
+    document.getElementById('card-website').addEventListener('click', () => { trackEvent('Form_Website_Start'); showScreen('website'); });
+    document.getElementById('card-website').addEventListener('keydown', e => { if (e.key==='Enter'||e.key===' ') { trackEvent('Form_Website_Start'); showScreen('website'); } });
+    document.getElementById('card-feedback').addEventListener('click', () => { trackEvent('Form_Feedback_Start'); showScreen('feedback'); });
+    document.getElementById('card-feedback').addEventListener('keydown', e => { if (e.key==='Enter'||e.key===' ') { trackEvent('Form_Feedback_Start'); showScreen('feedback'); } });
+    document.getElementById('chooser-wa-btn').addEventListener('click', () => trackEvent('WhatsApp_Click_Chooser'));
+
+    /* ══════════════════════════════════════════════
+       TOAST
+    ══════════════════════════════════════════════ */
+    const toast = document.getElementById('toast');
+    const toastMsg = document.getElementById('toast-msg');
+    let toastTimer;
+    function showToast(msg, type = '') {
+      clearTimeout(toastTimer);
+      toastMsg.textContent = msg;
+      toast.className = 'show ' + type;
+      toastTimer = setTimeout(() => { toast.className = ''; }, 3500);
+    }
+
+    /* ══════════════════════════════════════════════
+       META PIXEL EVENTS
+    ══════════════════════════════════════════════ */
+    function trackEvent(name, data) {
+      if (typeof fbq !== 'undefined') {
+        fbq('trackCustom', name, data || {});
+      }
+    }
+
+    /* ══════════════════════════════════════════════
+       VALIDATORS
+    ══════════════════════════════════════════════ */
+    const validators = {
+      email: v => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v.trim()),
+      tel:   v => /^[\d\s\+\-\(\)]{6,}$/.test(v.trim()),
+      default: v => v.trim().length > 0
+    };
+
+    function validate(id) {
+      const el = document.getElementById(id);
+      if (!el) return true;
+      const fn = validators[el.type] || validators.default;
+      return fn(el.value);
+    }
+
+    function markError(fieldWrapId, inputId) {
+      const wrap = document.getElementById(fieldWrapId);
+      const input = document.getElementById(inputId);
+      if (!wrap || !input) return;
+      wrap.classList.add('has-error');
+      input.classList.add('error');
+      input.addEventListener('input', function clear() {
+        const fn = validators[input.type] || validators.default;
+        if (fn(input.value)) {
+          wrap.classList.remove('has-error');
+          input.classList.remove('error');
+          input.removeEventListener('input', clear);
+        }
+      }, { passive: true });
+    }
+
+    /* ══════════════════════════════════════════════
+       TELEGRAM SENDER
+    ══════════════════════════════════════════════ */
+    const overlay = document.getElementById('submitting-overlay');
+
+    async function sendToTelegram(text, onSuccess, onError) {
+      overlay.classList.add('show');
+      try {
+        const res = await fetch('https://api.telegram.org/bot' + TELEGRAM_TOKEN + '/sendMessage', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ chat_id: TELEGRAM_CHAT, text, parse_mode: 'HTML' })
+        });
+        if (!res.ok) throw new Error('Network error');
+        overlay.classList.remove('show');
+        onSuccess();
+      } catch (err) {
+        overlay.classList.remove('show');
+        if (onError) onError();
+        else showToast('Submission failed. Please try again.', 'error');
+      }
+    }
+
+    /* ══════════════════════════════════════════════
+       WEBSITE FORM LOGIC
+    ══════════════════════════════════════════════ */
+    let wPanel = 0;
+    const wPanels = document.querySelectorAll('#screen-website .panel');
+    const wSteps  = document.querySelectorAll('[data-w-step]');
+    const wProgress = document.getElementById('w-progress-fill');
+    const wShell = document.getElementById('website-form-shell');
+    const wSuccess = document.getElementById('w-success');
+
+    const wFields = [
+      [['wf-fullName','w-fullName'],['wf-email','w-email'],['wf-phone','w-phone']],
+      [['wf-businessName','w-businessName'],['wf-businessLocation','w-businessLocation'],['wf-websiteGoal','w-websiteGoal']],
+      [['wf-serviceList','w-serviceList'],['wf-hasLogo','w-hasLogo'],['wf-colors','w-colors']],
+      [['wf-socialMedia','w-socialMedia'],['wf-functionality','w-functionality'],['wf-content','w-content']],
+    ];
+
+    function wGoTo(idx, dir) {
+      wPanels[wPanel].classList.remove('active');
+      wPanels[wPanel].classList.add(dir==='forward'?'exit-left':'exit-right');
+      setTimeout(()=>wPanels[wPanel].classList.remove('exit-left','exit-right'),400);
+      wPanel = idx;
+      wPanels[wPanel].classList.add('active');
+      wSteps.forEach((s,i)=>{
+        s.classList.remove('active','done');
+        if (i<wPanel) s.classList.add('done');
+        else if (i===wPanel) s.classList.add('active');
+      });
+      wProgress.style.width = ((wPanel+1)/4*100)+'%';
+      window.scrollTo({top:0,behavior:'smooth'});
+    }
+
+    function wValidate(pIdx) {
+      const fields = wFields[pIdx];
+      let ok = true;
+      fields.forEach(([wid,id]) => {
+        if (!validate(id)) { markError(wid,id); ok=false; }
+      });
+      if (!ok) {
+        showToast('Please fill in all required fields.','error');
+        const first = fields.find(([wid,id])=>!validate(id));
+        if (first) setTimeout(()=>document.getElementById(first[1]).focus(),100);
+      }
+      return ok;
+    }
+
+    function wire(id, fn) {
+      const el = document.getElementById(id);
+      if (!el) return;
+      el.addEventListener('click', fn);
+      el.addEventListener('touchend', e=>{e.preventDefault();fn(e);},{passive:false});
+    }
+
+    wire('w-btn-next-0', ()=>{ if(wValidate(0)) wGoTo(1,'forward'); });
+    wire('w-btn-next-1', ()=>{ if(wValidate(1)) wGoTo(2,'forward'); });
+    wire('w-btn-next-2', ()=>{ if(wValidate(2)) wGoTo(3,'forward'); });
+    wire('w-btn-prev-1', ()=>wGoTo(0,'back'));
+    wire('w-btn-prev-2', ()=>wGoTo(1,'back'));
+    wire('w-btn-prev-3', ()=>wGoTo(2,'back'));
+
+    wire('w-btn-submit', ()=>{
+      if (!wValidate(3)) return;
+      const vals = wFields.flat().map(([,id])=>{
+        const el=document.getElementById(id);
+        return '<b>'+(el?el.name:id)+':</b> '+(el?el.value:'');
+      }).join('\n');
+      const msg = '🌐 <b>NEW WEBSITE BRIEF</b>\n━━━━━━━━━━━━━━━\n' + vals;
+      sendToTelegram(msg, ()=>{
+        trackEvent('Form_Website_Submit');
+        wShell.style.display='none';
+        document.querySelector('#screen-website .stepper').style.display='none';
+        document.querySelector('#screen-website .progress-bar-wrap').style.display='none';
+        document.querySelector('#screen-website .form-header').style.display='none';
+        wSuccess.classList.add('show');
+      });
+    });
+
+    document.getElementById('btn-website-back').addEventListener('click',()=>{
+      if(wPanel>0){ wGoTo(wPanel-1,'back'); } else { showScreen('chooser'); }
+    });
+
+    /* ══════════════════════════════════════════════
+       FEEDBACK FORM LOGIC
+    ══════════════════════════════════════════════ */
+    let fPanel = 0;
+    const fPanels = document.querySelectorAll('#screen-feedback .panel');
+    const fSteps  = document.querySelectorAll('[data-f-step]');
+    const fProgress = document.getElementById('f-progress-fill');
+    const fShell = document.getElementById('feedback-form-shell');
+    const fSuccess = document.getElementById('f-success');
+
+    const fRequired = [
+      [['ff-bizName','f-bizName'],['ff-bizType','f-bizType'],['ff-bizLocation','f-bizLocation']],
+      [['ff-telegramHandle','f-telegramHandle']],
+      [['ff-ownerName','f-ownerName'],['ff-ownerPhone','f-ownerPhone']],
+    ];
+
+    function fGoTo(idx, dir) {
+      fPanels[fPanel].classList.remove('active');
+      fPanels[fPanel].classList.add(dir==='forward'?'exit-left':'exit-right');
+      setTimeout(()=>fPanels[fPanel].classList.remove('exit-left','exit-right'),400);
+      fPanel = idx;
+      fPanels[fPanel].classList.add('active');
+      fSteps.forEach((s,i)=>{
+        s.classList.remove('active','done');
+        if (i<fPanel) s.classList.add('done');
+        else if (i===fPanel) s.classList.add('active');
+      });
+      fProgress.style.width = ((fPanel+1)/3*100)+'%';
+      window.scrollTo({top:0,behavior:'smooth'});
+    }
+
+    function fValidate(pIdx) {
+      const fields = fRequired[pIdx];
+      let ok = true;
+      fields.forEach(([wid,id]) => {
+        if (!validate(id)) { markError(wid,id); ok=false; }
+      });
+      // panel 1: also check feedback types selected
+      if (pIdx===1) {
+        const selected = [...document.querySelectorAll('#feedback-type-pills .selected-gold')].map(b=>b.dataset.val);
+        document.getElementById('f-feedbackTypes').value = selected.join(', ');
+        if (!selected.length) {
+          document.getElementById('ff-feedbackTypes').classList.add('has-error');
+          document.getElementById('ff-feedbackTypes-hint').style.display='block';
+          ok = false;
+        }
+      }
+      if (!ok) showToast('Please fill in all required fields.','error');
+      return ok;
+    }
+
+    wire('f-btn-next-0', ()=>{ if(fValidate(0)) fGoTo(1,'forward'); });
+    wire('f-btn-next-1', ()=>{ if(fValidate(1)) fGoTo(2,'forward'); });
+    wire('f-btn-prev-1', ()=>fGoTo(0,'back'));
+    wire('f-btn-prev-2', ()=>fGoTo(1,'back'));
+
+    wire('f-btn-submit', ()=>{
+      if (!fValidate(2)) return;
+      const bizName     = document.getElementById('f-bizName').value;
+      const bizType     = document.getElementById('f-bizType').value;
+      const bizLoc      = document.getElementById('f-bizLocation').value;
+      const fbTypes     = document.getElementById('f-feedbackTypes').value;
+      const anon        = document.getElementById('f-anonymous').value;
+      const tgHandle    = document.getElementById('f-telegramHandle').value;
+      const ownerName   = document.getElementById('f-ownerName').value;
+      const ownerPhone  = document.getElementById('f-ownerPhone').value;
+      const extra       = document.getElementById('f-extra').value;
+      const msg = `💬 <b>NEW FEEDBACK SYSTEM REQUEST</b>\n━━━━━━━━━━━━━━━\n<b>Business:</b> ${bizName}\n<b>Type:</b> ${bizType}\n<b>Location:</b> ${bizLoc}\n<b>Feedback Types:</b> ${fbTypes}\n<b>Allow Anonymous:</b> ${anon}\n<b>Telegram Handle:</b> ${tgHandle}\n<b>Owner Name:</b> ${ownerName}\n<b>Phone:</b> ${ownerPhone}\n<b>Extra Notes:</b> ${extra||'—'}`;
+      sendToTelegram(msg, ()=>{
+        trackEvent('Form_Feedback_Submit');
+        fShell.style.display='none';
+        document.querySelector('#screen-feedback .stepper').style.display='none';
+        document.querySelector('#screen-feedback .progress-bar-wrap').style.display='none';
+        document.querySelector('#screen-feedback .form-header').style.display='none';
+        fSuccess.classList.add('show');
+      });
+    });
+
+    document.getElementById('btn-feedback-back').addEventListener('click',()=>{
+      if(fPanel>0){ fGoTo(fPanel-1,'back'); } else { showScreen('chooser'); }
+    });
+
+    /* ── Feedback type pills toggle ── */
+    document.querySelectorAll('#feedback-type-pills .radio-pill').forEach(btn => {
+      btn.addEventListener('click', ()=>{
+        btn.classList.toggle('selected-gold');
+        // clear hint when at least one selected
+        const any = [...document.querySelectorAll('#feedback-type-pills .selected-gold')].length;
+        if (any) { document.getElementById('ff-feedbackTypes').classList.remove('has-error'); document.getElementById('ff-feedbackTypes-hint').style.display='none'; }
+      });
+    });
+
+    /* ── Anonymous toggle ── */
+    document.getElementById('anon-yes').addEventListener('click',()=>{
+      document.getElementById('anon-yes').classList.add('selected-gold');
+      document.getElementById('anon-no').classList.remove('selected-gold');
+      document.getElementById('f-anonymous').value='Yes';
+    });
+    document.getElementById('anon-no').addEventListener('click',()=>{
+      document.getElementById('anon-no').classList.add('selected-gold');
+      document.getElementById('anon-yes').classList.remove('selected-gold');
+      document.getElementById('f-anonymous').value='No';
+    });
+
+    /* ── iOS input scroll ── */
+    document.querySelectorAll('.field-input').forEach(input => {
+      input.addEventListener('focus', ()=>{
+        setTimeout(()=>input.scrollIntoView({behavior:'smooth',block:'center'}),300);
+      },{passive:true});
+    });
+
+    /* ── LOADER ── */
+    window.addEventListener('load',()=>{
+      setTimeout(()=>document.getElementById('loader').classList.add('hidden'),600);
+    });
+
+    /* ── Update WhatsApp links with configured number ── */
+    if (WHATSAPP_NUMBER && WHATSAPP_NUMBER !== '0272831301') {
+      document.querySelectorAll('a[href*="0272831301"]').forEach(a=>{
+        a.href = a.href.replace(/0272831301/g, WHATSAPP_NUMBER);
+      });
+    }
+
+  })();
+  </script>
 </body>
 </html>
