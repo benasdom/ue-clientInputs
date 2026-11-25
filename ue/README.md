@@ -1,0 +1,9 @@
+# ue-clientInputs (rebuild)
+Static site (no build step). Open `index.html` or deploy to GitHub Pages (CNAME included).
+
+- **Stack:** HTML, CSS, vanilla JS, GSAP + ScrollTrigger (cdnjs), Lenis (jsDelivr), Anek Latin (Google Fonts).
+- **Brand:** UE Cyan #00AEEF, Elite Navy #0B2447, Mist #F2F7FB default background, navy text on cyan buttons.
+- **Images:** every image uses `img/logo.png`. For the 10 portfolio screenshots, change the `src` in `js/main.js` (`WORKS` array, build of `#shots`) e.g. `img/work-01.png`. Use 16:9 for best fit.
+- **Logo:** `img/logo-mark.svg`, `img/logo-full.svg` were extracted from the brand PDF; inline `<symbol>`s in `index.html`.
+- **Forms:** `js/main.js` (`FORMS`) post to Telegram using `js/config.js`.
+  **Security:** the bot token in `config.js` (and in your old repo history) is public. Rotate it in @BotFather and, ideally, send via a small serverless proxy.
